@@ -173,6 +173,15 @@ Contributions welcome! Areas for improvement:
 
 ## 📄 License
 
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+### Data Sources
+- **Kalaallisut-English Dictionary**: Oqaasileriffik (Greenland Language Secretariat)
+- **Morphological Analyzer**: GiellaLT/lang-kal (GPL v3/LGPL)
+- **Alignment Tool**: hunalign by Daniel Varga
+- **Parallel Corpus**: Danish-Kalaallisut government documents (public domain)
+
+The MIT License applies to the code and processed data in this repository. Users should comply with the licenses of underlying tools (particularly lang-kal's GPL/LGPL license when using morphological analysis features).
 
 ## 🙏 Acknowledgments
 

@@ -21,6 +21,8 @@ Performance:
 - High confidence (>0.5): 34.7%
 - Morphology coverage: 16,819 roots
 
+License: MIT License (see LICENSE file)
+
 For setup: ./setup.sh
 For usage: cat README.md
 For help: cat docs/GUIDE.md
