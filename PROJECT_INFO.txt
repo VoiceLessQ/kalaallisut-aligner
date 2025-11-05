@@ -1,0 +1,26 @@
+Kalaallisut-Danish Sentence Aligner
+====================================
+
+Version: 1.0
+Built: November 2025
+Status: Production Ready
+
+Components:
+- Morphological analyzer (lang-kal/GiellaLT)
+- Sentence aligner (hunalign + cognates)
+- Glosser (16,819 dictionary entries)
+- Cognate extractor (1,526 entries)
+
+Dataset:
+- 6,798 aligned sentence pairs
+- 5,438 training / 1,360 test
+- Danish-Kalaallisut government documents
+
+Performance:
+- Alignment confidence: 48.1% average
+- High confidence (>0.5): 34.7%
+- Morphology coverage: 16,819 roots
+
+For setup: ./setup.sh
+For usage: cat README.md
+For help: cat docs/GUIDE.md

@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Data files
+data/raw/*.txt
+data/processed/*.txt
+*.zip
+*.tar.gz
+
+# Temporary files
+*.tmp
+*.log
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Keep important files
+!data/processed/cognates.json
+!data/processed/hunalign_dict_full.txt
+!data/processed/alignment_stats.json
+!README.md
