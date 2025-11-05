@@ -11,10 +11,10 @@ Complete NLP toolkit for Kalaallisut language processing and Danish-Kalaallisut 
 - **Cognate Extractor** - 1,526 Danish-Kalaallisut shared terms
 
 ### 📊 Dataset
-- **6,798 aligned sentence pairs** (5,438 train / 1,360 test)
+- **6,812 aligned sentence pairs** (5,450 train / 1,362 test)
 - Extracted from parallel Danish-Kalaallisut government documents
 - Smart date-aware sentence splitting
-- Avg word ratio: 1.48 (Danish/Kalaallisut)
+- Avg word ratio: 1.36 (Danish/Kalaallisut)
 
 ## 🚀 Quick Start
 
@@ -22,7 +22,7 @@ Complete NLP toolkit for Kalaallisut language processing and Danish-Kalaallisut 
 ```bash
 # Install dependencies
 sudo apt install build-essential git make hunalign
-pip3 install --break-system-packages pandas odfpy
+pip3 install -r requirements.txt
 
 # Install lang-kal (morphological analyzer)
 cd ~
@@ -31,6 +31,10 @@ cd lang-kal
 ./autogen.sh
 ./configure --disable-syntax --enable-tokenisers --enable-analysers
 make
+
+# Optional: Set custom paths (if installed elsewhere)
+export LANG_KAL_PATH=/path/to/lang-kal
+export HUNALIGN_PATH=/path/to/hunalign/hunalign
 ```
 
 ### Installation
@@ -112,7 +116,8 @@ kalaallisut-aligner/
 
 ### Models & Stats
 - `data/processed/alignment_stats.json` - Training corpus statistics
-- `data/raw/existing_alignments.txt` - 6,798 training pairs
+- `data/aligned/corpus_6798_pairs.txt` - 6,812 aligned training pairs
+- `data/DATA_VERSIONS.md` - Data version tracking and provenance
 
 ## 📈 Performance
 
@@ -158,10 +163,44 @@ done
 
 ## 📚 References
 
-- **lang-kal:** https://github.com/giellalt/lang-kal
-- **hunalign:** https://github.com/danielvarga/hunalign
-- **Oqaasileriffik:** Dictionary source
-- **GiellaLT:** Giella infrastructure for indigenous languages
+### Software & Tools
+
+- **lang-kal:** Kalaallisut morphological analyzer
+  https://github.com/giellalt/lang-kal
+  License: GPL-3.0
+
+- **hunalign:** Bilingual sentence alignment tool
+  https://github.com/danielvarga/hunalign
+  Varga, D., Halácsy, P., Kornai, A., Nagy, V., Németh, L., & Trón, V. (2005). "Parallel corpora for medium density languages." *RANLP 2005*.
+  License: LGPL-3.0
+
+- **GiellaLT:** Infrastructure for indigenous language technology
+  https://giellalt.github.io/
+  Moshagen, S. N., Pirinen, T. A., & Trosterud, T. (2022). "Building an open-source development infrastructure for language technology projects." *LREC 2022*.
+  License: Dual CC-BY-SA / GPL
+
+### Data Sources
+
+- **Oqaasileriffik:** Greenland Language Secretariat
+  https://oqaasileriffik.gl/ | https://github.com/Oqaasileriffik/dicts
+  2018 Chicago Greenlandic-English Dictionary
+  License: CC-BY-SA 4.0
+
+### Academic Citations
+
+If you use this toolkit in research, please cite:
+
+```bibtex
+@misc{kalaallisut-aligner-2025,
+  author = {VoiceLessQ},
+  title = {Kalaallisut-Danish Sentence Aligner},
+  year = {2025},
+  publisher = {GitHub},
+  url = {https://github.com/VoiceLessQ/kalaallisut-aligner}
+}
+```
+
+And cite the underlying tools as appropriate.
 
 ## 🤝 Contributing
 
@@ -185,12 +224,28 @@ The MIT License applies to the code and processed data in this repository. Users
 
 ## 🙏 Acknowledgments
 
-- Oqaasileriffik for Kalaallisut dictionary
-- GiellaLT for lang-kal infrastructure
-- Daniel Varga for hunalign
+- **Oqaasileriffik** (Greenland Language Secretariat) for the Kalaallisut-English dictionary
+- **GiellaLT/Divvun/Giellatekno** for the lang-kal morphological analyzer infrastructure
+- **Daniel Varga et al.** for hunalign sentence alignment tool
+- **University of Chicago** for the 2018 Greenlandic-English dictionary collaboration
+
+## 🔧 Advanced Configuration
+
+### Environment Variables
+
+- `LANG_KAL_PATH`: Path to lang-kal installation (default: `~/lang-kal`)
+- `HUNALIGN_PATH`: Path to hunalign binary (default: `~/hunalign/src/hunalign/hunalign`)
+
+### Data Version Tracking
+
+See `data/DATA_VERSIONS.md` for:
+- Dictionary versions and update procedures
+- Data provenance and licensing
+- Corpus statistics and version history
 
 ---
 
-**Built:** November 2025  
-**Status:** Long way from done, but mostly usable  
+**Built:** November 2025
+**Version:** 1.0
+**Status:** Production ready
 **Maintainer:** VoiceLessQ
