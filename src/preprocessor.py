@@ -6,36 +6,57 @@ Uses lang-kal tools for tokenization and morphological analysis.
 
 import subprocess
 import json
+import os
+import sys
 from pathlib import Path
 
-# Paths to lang-kal tools
-LANG_KAL_ROOT = Path.home() / "lang-kal"
+# Paths to lang-kal tools (support environment variable with fallback)
+LANG_KAL_ROOT = Path(os.environ.get('LANG_KAL_PATH', Path.home() / "lang-kal"))
 TOKENIZER = LANG_KAL_ROOT / "tools/tokenisers/tokeniser-disamb-gt-desc.pmhfst"
 ANALYZER = LANG_KAL_ROOT / "src/fst/analyser-gt-desc.hfst"
+
+# Validate paths on import
+if not ANALYZER.exists():
+    print(f"ERROR: lang-kal analyzer not found at {ANALYZER}", file=sys.stderr)
+    print(f"Install lang-kal or set LANG_KAL_PATH environment variable", file=sys.stderr)
+    print(f"See: https://github.com/giellalt/lang-kal", file=sys.stderr)
 
 
 def tokenize_text(text):
     """Tokenize Kalaallisut text using lang-kal tokenizer."""
-    result = subprocess.run(
-        ["hfst-tokenize", str(TOKENIZER)],
-        input=text,
-        capture_output=True,
-        text=True
-    )
-    
+    try:
+        result = subprocess.run(
+            ["hfst-tokenize", str(TOKENIZER)],
+            input=text,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+    except FileNotFoundError:
+        print(f"ERROR: hfst-tokenize not found. Install HFST tools.", file=sys.stderr)
+        return []
+    except subprocess.CalledProcessError as e:
+        print(f"ERROR: Tokenization failed: {e.stderr}", file=sys.stderr)
+        return []
+
     tokens = [line.strip() for line in result.stdout.strip().split('\n') if line.strip()]
     return tokens
 
 
 def analyze_word(word):
     """Get morphological analysis of a word."""
-    result = subprocess.run(
-        ["hfst-lookup", str(ANALYZER)],
-        input=word,
-        capture_output=True,
-        text=True
-    )
-    
+    try:
+        result = subprocess.run(
+            ["hfst-lookup", str(ANALYZER)],
+            input=word,
+            capture_output=True,
+            text=True,
+            check=False  # hfst-lookup returns non-zero for unknown words
+        )
+    except FileNotFoundError:
+        print(f"ERROR: hfst-lookup not found. Install HFST tools.", file=sys.stderr)
+        return []
+
     # Parse output (format: word\tanalysis\tweight)
     analyses = []
     for line in result.stdout.strip().split('\n'):
@@ -48,7 +69,7 @@ def analyze_word(word):
                 'analysis': parts[1],
                 'weight': float(parts[2]) if len(parts) > 2 else 0.0
             })
-    
+
     return analyses
 
 

@@ -1,0 +1,17 @@
+# Kalaallisut-Danish Sentence Aligner
+# Python dependencies
+
+# Data processing
+pandas>=1.3.0
+
+# ODF document handling
+odfpy>=1.4.1
+
+# Note: System dependencies (not installable via pip):
+# - hunalign: https://github.com/danielvarga/hunalign
+# - lang-kal (HFST tools): https://github.com/giellalt/lang-kal
+# - build-essential, git, make (for building lang-kal)
+#
+# Set environment variables for custom paths:
+# - LANG_KAL_PATH: Path to lang-kal installation (default: ~/lang-kal)
+# - HUNALIGN_PATH: Path to hunalign binary (default: ~/hunalign/src/hunalign/hunalign)

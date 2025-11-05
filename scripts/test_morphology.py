@@ -4,20 +4,37 @@ Interactive Kalaallisut morphological analysis tester.
 """
 
 import subprocess
+import os
+import sys
 from pathlib import Path
 
-ANALYZER = Path.home() / "lang-kal/src/fst/analyser-gt-desc.hfst"
+# Support environment variable with fallback to default location
+LANG_KAL_ROOT = Path(os.environ.get('LANG_KAL_PATH', Path.home() / "lang-kal"))
+ANALYZER = LANG_KAL_ROOT / "src/fst/analyser-gt-desc.hfst"
+
+# Validate analyzer exists
+if not ANALYZER.exists():
+    print(f"ERROR: lang-kal analyzer not found at {ANALYZER}", file=sys.stderr)
+    print(f"Install lang-kal or set LANG_KAL_PATH environment variable", file=sys.stderr)
+    print(f"See: https://github.com/giellalt/lang-kal", file=sys.stderr)
+    sys.exit(1)
 
 
 def analyze_word(word):
     """Analyze a single word."""
-    result = subprocess.run(
-        ["hfst-lookup", str(ANALYZER)],
-        input=word,
-        capture_output=True,
-        text=True
-    )
-    
+    try:
+        result = subprocess.run(
+            ["hfst-lookup", str(ANALYZER)],
+            input=word,
+            capture_output=True,
+            text=True,
+            check=False  # hfst-lookup returns non-zero for unknown words
+        )
+    except FileNotFoundError:
+        print(f"ERROR: hfst-lookup not found. Install HFST tools.", file=sys.stderr)
+        print(f"See: https://github.com/giellalt/lang-kal", file=sys.stderr)
+        return []
+
     analyses = []
     for line in result.stdout.strip().split('\n'):
         if line.startswith('>') or not line.strip():
@@ -29,7 +46,7 @@ def analyze_word(word):
                 'analysis': parts[1],
                 'weight': float(parts[2]) if len(parts) > 2 else 0.0
             })
-    
+
     return analyses
 
 
