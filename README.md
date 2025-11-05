@@ -173,7 +173,6 @@ Contributions welcome! Areas for improvement:
 
 ## 📄 License
 
-[Your license here]
 
 ## 🙏 Acknowledgments
 
@@ -184,5 +183,5 @@ Contributions welcome! Areas for improvement:
 ---
 
 **Built:** November 2025  
-**Status:** Production-ready  
-**Maintainer:** [Your name]
+**Status:** Long way from done, but mostly usable  
+**Maintainer:** VoiceLessQ
