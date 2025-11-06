@@ -65,7 +65,15 @@ def process_sentence(sentence: str) -> List[Dict[str, Any]]:
 
 
 if __name__ == "__main__":
+    # Configure logging for standalone execution
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
     # Test
     test_sentence = "Takussaanga."
+    logger.info(f"Processing test sentence: {test_sentence}")
     result = process_sentence(test_sentence)
+    # Output to stdout (this is the actual program output, not a log)
     print(json.dumps(result, indent=2, ensure_ascii=False))

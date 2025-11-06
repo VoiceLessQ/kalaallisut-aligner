@@ -311,7 +311,13 @@ if __name__ == "__main__":
     # Test with a sample from test set
     from utils import load_aligned_pairs
 
-    print("=== TESTING ALIGNER ===\n")
+    # Configure logging for standalone execution
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    logger.info("=== TESTING ALIGNER ===")
 
     # Load test data
     test_pairs = load_aligned_pairs("data/processed/test.txt")[:10]  # First 10
@@ -325,11 +331,11 @@ if __name__ == "__main__":
     alignments = aligner.align_documents(danish_text, kal_text)
 
     # Show results
-    print("\n=== SAMPLE ALIGNMENTS ===")
+    logger.info("=== SAMPLE ALIGNMENTS ===")
     for i, align in enumerate(alignments[:3]):
-        print(f"\n{i+1}. Confidence: {align['confidence']:.2f}")
-        print(f"   DA: {align['danish'][:80]}...")
-        print(f"   KL: {align['kalaallisut'][:80]}...")
+        logger.info(f"{i+1}. Confidence: {align['confidence']:.2f}")
+        logger.info(f"   DA: {align['danish'][:80]}...")
+        logger.info(f"   KL: {align['kalaallisut'][:80]}...")
 
     # Save
     aligner.save_alignments(alignments, "data/aligned/test_output.txt")

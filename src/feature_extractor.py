@@ -3,9 +3,12 @@ Extract alignment features from training data.
 """
 
 import json
+import logging
 from pathlib import Path
 from preprocessor import tokenize_text, analyze_word
 from utils import load_aligned_pairs
+
+logger = logging.getLogger(__name__)
 
 
 def extract_features(pair):
@@ -44,12 +47,12 @@ def extract_features(pair):
 
 def analyze_training_data(pairs, sample_size=100):
     """Analyze training data to extract patterns."""
-    print(f"Analyzing {sample_size} pairs...")
+    logger.info(f"Analyzing {sample_size} pairs...")
 
     features = []
     for i, pair in enumerate(pairs[:sample_size]):
         if i % 20 == 0:
-            print(f"  Processing {i}/{sample_size}...")
+            logger.info(f"  Processing {i}/{sample_size}...")
 
         feat = extract_features(pair)
         features.append(feat)
@@ -68,20 +71,26 @@ def analyze_training_data(pairs, sample_size=100):
 
 
 if __name__ == "__main__":
-    print("Loading training data...")
+    # Configure logging for standalone execution
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    logger.info("Loading training data...")
     train_pairs = load_aligned_pairs("data/processed/train.txt")
 
-    print(f"Loaded {len(train_pairs)} training pairs\n")
+    logger.info(f"Loaded {len(train_pairs)} training pairs")
 
     # Analyze subset (100 pairs for speed)
     stats = analyze_training_data(train_pairs, sample_size=100)
 
-    print("\n=== ALIGNMENT STATISTICS ===")
-    print(f"Average word ratio (DA:KL): {stats['avg_word_ratio']:.2f}")
-    print(f"Average char ratio (DA:KL): {stats['avg_char_ratio']:.2f}")
+    logger.info("=== ALIGNMENT STATISTICS ===")
+    logger.info(f"Average word ratio (DA:KL): {stats['avg_word_ratio']:.2f}")
+    logger.info(f"Average char ratio (DA:KL): {stats['avg_char_ratio']:.2f}")
 
     # Save stats
     with open("data/processed/alignment_stats.json", "w") as f:
         json.dump(stats, f, indent=2)
 
-    print("\nSaved to: data/processed/alignment_stats.json")
+    logger.info("Saved to: data/processed/alignment_stats.json")
