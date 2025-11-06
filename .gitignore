@@ -22,6 +22,9 @@ data/processed/*.txt
 *.log
 .DS_Store
 
+# Documentation builds
+docs/build/
+
 # IDE
 .vscode/
 .idea/
