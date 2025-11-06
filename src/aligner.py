@@ -92,12 +92,13 @@ class SentenceAligner:
         }
 
         sentences = []
-        current = ""
+        current_chars = []
 
         for i, char in enumerate(text):
-            current += char
+            current_chars.append(char)
 
             if char in ".!?":
+                current = "".join(current_chars)
                 if len(current.strip()) < config.min_sentence_length:
                     continue
 
@@ -105,7 +106,7 @@ class SentenceAligner:
                 next_text = text[i + 1 :].strip()
                 if not next_text:
                     sentences.append(current.strip())
-                    current = ""
+                    current_chars = []
                     continue
 
                 # Check if last token before period is a number
@@ -125,10 +126,10 @@ class SentenceAligner:
 
                 # Split on uppercase (new sentence)
                 sentences.append(current.strip())
-                current = ""
+                current_chars = []
 
-        if current.strip():
-            sentences.append(current.strip())
+        if current_chars:
+            sentences.append("".join(current_chars).strip())
 
         return sentences
 
