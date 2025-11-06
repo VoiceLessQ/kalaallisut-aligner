@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-import sys, json
+import sys
+import json
+import logging
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from preprocessor import tokenize_text, analyze_word
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 class KalaallisutGlosser:
@@ -53,7 +58,7 @@ class KalaallisutGlosser:
         if "tags" not in self.glosses or "roots" not in self.glosses:
             raise ValueError("morpheme_glosses.json must have 'tags' and 'roots' keys")
 
-        print(f"Loaded {len(self.kal_eng)} dictionary entries", file=sys.stderr)
+        logger.info(f"Loaded {len(self.kal_eng)} dictionary entries")
 
     def gloss_morpheme(self, morpheme):
         if morpheme in self.glosses["tags"]:
@@ -122,7 +127,7 @@ class KalaallisutGlosser:
                 continue
             except RuntimeError as e:
                 # Analysis failed, treat as unknown
-                print(f"Warning: Failed to analyze '{token}': {e}", file=sys.stderr)
+                logger.warning(f"Failed to analyze '{token}': {e}")
                 analyses = []
 
             if not analyses:
@@ -189,34 +194,34 @@ def main():
         if args.input:
             input_path = Path(args.input)
             if not input_path.exists():
-                print(f"Error: Input file not found: {args.input}", file=sys.stderr)
+                logger.error(f"Input file not found: {args.input}")
                 return 1
             with open(args.input, encoding="utf-8") as f:
                 text = f.read()
         else:
             text = sys.stdin.read()
     except IOError as e:
-        print(f"Error reading input: {e}", file=sys.stderr)
+        logger.error(f"Error reading input: {e}")
         return 1
     except UnicodeDecodeError as e:
-        print(f"Error: Invalid encoding in input file: {e}", file=sys.stderr)
+        logger.error(f"Invalid encoding in input file: {e}")
         return 1
 
     if not text.strip():
-        print("Error: Input text is empty", file=sys.stderr)
+        logger.error("Input text is empty")
         return 1
 
     # Initialize glosser and process
     try:
         glosser = KalaallisutGlosser()
     except (FileNotFoundError, ValueError) as e:
-        print(f"Error initializing glosser: {e}", file=sys.stderr)
+        logger.error(f"Error initializing glosser: {e}")
         return 1
 
     try:
         glossed = glosser.gloss_text(text)
     except (ValueError, RuntimeError) as e:
-        print(f"Error glossing text: {e}", file=sys.stderr)
+        logger.error(f"Error glossing text: {e}")
         return 1
 
     output = glosser.output_text(glossed)
@@ -228,11 +233,11 @@ def main():
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with open(args.output, "w", encoding="utf-8") as f:
                 f.write(output)
-            print(f"Output written to: {args.output}", file=sys.stderr)
+            logger.info(f"Output written to: {args.output}")
         else:
             print(output)
     except IOError as e:
-        print(f"Error writing output: {e}", file=sys.stderr)
+        logger.error(f"Error writing output: {e}")
         return 1
 
     return 0

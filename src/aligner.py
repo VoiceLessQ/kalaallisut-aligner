@@ -4,9 +4,13 @@ Core alignment algorithm for Danish-Kalaallisut sentence pairs.
 """
 
 import json
+import logging
 import sys
 from pathlib import Path
 from preprocessor import tokenize_text
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 class SentenceAligner:
@@ -244,27 +248,25 @@ class SentenceAligner:
 
         # Warn about large documents
         if len(danish_text) > 1_000_000:
-            print(
-                f"Warning: Large document ({len(danish_text)} chars)", file=sys.stderr
-            )
+            logger.warning(f"Large document ({len(danish_text)} chars)")
 
-        print("Splitting sentences...")
+        logger.info("Splitting sentences...")
         try:
             danish_sents = self.split_sentences(danish_text)
             kal_sents = self.split_sentences(kal_text)
         except ValueError as e:
             raise ValueError(f"Sentence splitting failed: {e}")
 
-        print(f"  Danish: {len(danish_sents)} sentences")
-        print(f"  Kalaallisut: {len(kal_sents)} sentences")
+        logger.info(f"Danish: {len(danish_sents)} sentences")
+        logger.info(f"Kalaallisut: {len(kal_sents)} sentences")
 
         if not danish_sents or not kal_sents:
             raise ValueError("No sentences found after splitting")
 
-        print("\nAligning...")
+        logger.info("Aligning...")
         alignments = self.align_greedy(danish_sents, kal_sents)
 
-        print(f"  Created {len(alignments)} alignments")
+        logger.info(f"Created {len(alignments)} alignments")
 
         return alignments
 
@@ -293,7 +295,7 @@ class SentenceAligner:
         except IOError as e:
             raise IOError(f"Failed to write to {output_file}: {e}")
 
-        print(f"\nSaved to: {output_file}")
+        logger.info(f"Saved to: {output_file}")
 
 
 if __name__ == "__main__":
