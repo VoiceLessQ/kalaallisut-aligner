@@ -15,9 +15,9 @@ print(f"Loaded {len(pairs)} sentence pairs")
 word_counts = defaultdict(lambda: defaultdict(int))
 
 for pair in pairs:
-    da_words = pair['danish'].lower().split()
-    kal_words = pair['kalaallisut'].lower().split()
-    
+    da_words = pair["danish"].lower().split()
+    kal_words = pair["kalaallisut"].lower().split()
+
     # Count co-occurrences (simple approach)
     for da_word in da_words:
         for kal_word in kal_words:
@@ -28,9 +28,9 @@ da_kal_dict = {}
 
 for da_word, kal_counts in word_counts.items():
     # Skip if too short or punctuation
-    if len(da_word) < 3 or da_word in '.,;:!?()[]':
+    if len(da_word) < 3 or da_word in ".,;:!?()[]":
         continue
-    
+
     # Get most frequent Kalaallisut word
     if kal_counts:
         best_kal = max(kal_counts.items(), key=lambda x: x[1])
@@ -41,7 +41,7 @@ for da_word, kal_counts in word_counts.items():
 print(f"\nExtracted {len(da_kal_dict)} word pairs")
 
 # Save
-with open('data/processed/danish_kalaallisut_dict.json', 'w', encoding='utf-8') as f:
+with open("data/processed/danish_kalaallisut_dict.json", "w", encoding="utf-8") as f:
     json.dump(da_kal_dict, f, indent=2, ensure_ascii=False)
 
 print("Saved to: data/processed/danish_kalaallisut_dict.json")
