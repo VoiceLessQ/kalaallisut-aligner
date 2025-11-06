@@ -2,6 +2,7 @@
 import sys
 import json
 import logging
+from functools import lru_cache
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 
@@ -59,26 +60,49 @@ class KalaallisutGlosser:
         if "tags" not in self.glosses or "roots" not in self.glosses:
             raise ValueError("morpheme_glosses.json must have 'tags' and 'roots' keys")
 
+        # Initialize caches for performance
+        self._gloss_cache: Dict[str, str] = {}
+        self._translate_cache: Dict[str, Optional[str]] = {}
+
         logger.info(f"Loaded {len(self.kal_eng)} dictionary entries")
 
     def gloss_morpheme(self, morpheme: str) -> str:
+        # Check cache first
+        if morpheme in self._gloss_cache:
+            return self._gloss_cache[morpheme]
+
+        # Lookup and cache result
         if morpheme in self.glosses["tags"]:
-            return self.glosses["tags"][morpheme]
-        if morpheme in self.glosses["roots"]:
-            return self.glosses["roots"][morpheme]
-        if morpheme in self.kal_eng:
-            return self.kal_eng[morpheme]
-        return morpheme
+            result = self.glosses["tags"][morpheme]
+        elif morpheme in self.glosses["roots"]:
+            result = self.glosses["roots"][morpheme]
+        elif morpheme in self.kal_eng:
+            result = self.kal_eng[morpheme]
+        else:
+            result = morpheme
+
+        self._gloss_cache[morpheme] = result
+        return result
 
     def translate_root(self, root: str) -> Optional[str]:
+        # Check cache first
+        if root in self._translate_cache:
+            return self._translate_cache[root]
+
+        # Lookup and cache result
+        result = None
         if root in self.kal_eng:
-            return self.kal_eng[root]
-        for suffix in ["voq", "poq", "soq", "toq", "neq"]:
-            if root.endswith(suffix):
-                base = root[: -len(suffix)]
-                if base in self.kal_eng:
-                    return self.kal_eng[base]
-        return None
+            result = self.kal_eng[root]
+        else:
+            for suffix in ["voq", "poq", "soq", "toq", "neq"]:
+                if root.endswith(suffix):
+                    base = root[: -len(suffix)]
+                    if base in self.kal_eng:
+                        result = self.kal_eng[base]
+                        break
+
+        self._translate_cache[root] = result
+        return result
 
     def format_analysis(self, word: str, analysis: Dict[str, Any]) -> Dict[str, Any]:
         parts = analysis["analysis"].split("+")
