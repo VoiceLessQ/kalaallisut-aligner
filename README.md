@@ -1,5 +1,7 @@
 # Kalaallisut-Danish Sentence Aligner
 
+[![Test](https://github.com/VoiceLessQ/kalaallisut-aligner/actions/workflows/test.yml/badge.svg)](https://github.com/VoiceLessQ/kalaallisut-aligner/actions/workflows/test.yml)
+
 Complete NLP toolkit for Kalaallisut language processing and Danish-Kalaallisut parallel corpus alignment.
 
 ## 🎯 Features
