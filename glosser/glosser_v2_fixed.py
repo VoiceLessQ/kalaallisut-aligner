@@ -46,7 +46,9 @@ class KalaallisutGlosser:
 
         # Validate structure
         if not isinstance(self.kal_eng, dict):
-            raise ValueError(f"Dictionary must be a JSON object, got {type(self.kal_eng)}")
+            raise ValueError(
+                f"Dictionary must be a JSON object, got {type(self.kal_eng)}"
+            )
 
         if "tags" not in self.glosses or "roots" not in self.glosses:
             raise ValueError("morpheme_glosses.json must have 'tags' and 'roots' keys")
