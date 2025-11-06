@@ -4,8 +4,11 @@ Core alignment algorithm for Danish-Kalaallisut sentence pairs.
 """
 
 import json
+import logging
 from pathlib import Path
 from preprocessor import tokenize_text
+
+logger = logging.getLogger(__name__)
 
 
 class SentenceAligner:
@@ -110,17 +113,17 @@ class SentenceAligner:
 
     def align_documents(self, danish_text, kal_text):
         """Align two documents."""
-        print("Splitting sentences...")
+        logger.info("Splitting sentences...")
         danish_sents = self.split_sentences(danish_text)
         kal_sents = self.split_sentences(kal_text)
 
-        print(f"  Danish: {len(danish_sents)} sentences")
-        print(f"  Kalaallisut: {len(kal_sents)} sentences")
+        logger.info(f"  Danish: {len(danish_sents)} sentences")
+        logger.info(f"  Kalaallisut: {len(kal_sents)} sentences")
 
-        print("\nAligning...")
+        logger.info("Aligning...")
         alignments = self.align_greedy(danish_sents, kal_sents)
 
-        print(f"  Created {len(alignments)} alignments")
+        logger.info(f"  Created {len(alignments)} alignments")
 
         return alignments
 
@@ -130,14 +133,19 @@ class SentenceAligner:
             for align in alignments:
                 f.write(f"{align['danish']} @ {align['kalaallisut']}\n")
 
-        print(f"\nSaved to: {output_file}")
+        logger.info(f"Saved to: {output_file}")
 
 
 if __name__ == "__main__":
+    # Configure logging for standalone execution
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
     # Test with a sample from test set
     from utils import load_aligned_pairs
 
-    print("=== TESTING ALIGNER ===\n")
+    logger.info("=== TESTING ALIGNER ===")
 
     # Load test data
     test_pairs = load_aligned_pairs("data/processed/test.txt")[:10]  # First 10
@@ -151,11 +159,11 @@ if __name__ == "__main__":
     alignments = aligner.align_documents(danish_text, kal_text)
 
     # Show results
-    print("\n=== SAMPLE ALIGNMENTS ===")
+    logger.info("=== SAMPLE ALIGNMENTS ===")
     for i, align in enumerate(alignments[:3]):
-        print(f"\n{i+1}. Confidence: {align['confidence']:.2f}")
-        print(f"   DA: {align['danish'][:80]}...")
-        print(f"   KL: {align['kalaallisut'][:80]}...")
+        logger.info(f"{i+1}. Confidence: {align['confidence']:.2f}")
+        logger.info(f"   DA: {align['danish'][:80]}...")
+        logger.info(f"   KL: {align['kalaallisut'][:80]}...")
 
     # Save
     aligner.save_alignments(alignments, "data/aligned/test_output.txt")

@@ -4,12 +4,19 @@ Extract Danish-Kalaallisut word dictionary from aligned pairs.
 """
 
 import json
+import logging
 from collections import defaultdict
 from src.utils import load_aligned_pairs
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
 # Load aligned pairs
 pairs = load_aligned_pairs("data/raw/existing_alignments.txt")
-print(f"Loaded {len(pairs)} sentence pairs")
+logger.info(f"Loaded {len(pairs)} sentence pairs")
 
 # Count word co-occurrences
 word_counts = defaultdict(lambda: defaultdict(int))
@@ -38,15 +45,15 @@ for da_word, kal_counts in word_counts.items():
         if best_kal[1] >= 3:
             da_kal_dict[da_word] = best_kal[0]
 
-print(f"\nExtracted {len(da_kal_dict)} word pairs")
+logger.info(f"Extracted {len(da_kal_dict)} word pairs")
 
 # Save
 with open("data/processed/danish_kalaallisut_dict.json", "w", encoding="utf-8") as f:
     json.dump(da_kal_dict, f, indent=2, ensure_ascii=False)
 
-print("Saved to: data/processed/danish_kalaallisut_dict.json")
+logger.info("Saved to: data/processed/danish_kalaallisut_dict.json")
 
 # Show samples
-print("\nSample entries:")
+logger.info("Sample entries:")
 for i, (da, kal) in enumerate(list(da_kal_dict.items())[:20]):
-    print(f"  {da} → {kal}")
+    logger.info(f"  {da} → {kal}")

@@ -3,10 +3,13 @@
 Utility functions for the aligner.
 """
 
+import logging
 import random
 import sys
 from pathlib import Path
 from typing import List, Dict, Tuple
+
+logger = logging.getLogger(__name__)
 
 
 def load_aligned_pairs(filepath: str) -> List[Dict[str, str]]:
@@ -40,18 +43,14 @@ def load_aligned_pairs(filepath: str) -> List[Dict[str, str]]:
 
                 parts = line.split(" @ ")
                 if len(parts) != 2:
-                    print(
-                        f"Warning: Skipping malformed line {line_num}: {line[:50]}...",
-                        file=sys.stderr,
+                    logger.warning(
+                        f"Skipping malformed line {line_num}: {line[:50]}..."
                     )
                     continue
 
                 danish, kalaallisut = parts
                 if not danish.strip() or not kalaallisut.strip():
-                    print(
-                        f"Warning: Skipping empty sentence at line {line_num}",
-                        file=sys.stderr,
-                    )
+                    logger.warning(f"Skipping empty sentence at line {line_num}")
                     continue
 
                 pairs.append(
@@ -142,28 +141,33 @@ def save_pairs(pairs: List[Dict[str, str]], filepath: str) -> None:
 
 
 if __name__ == "__main__":
+    # Configure logging for standalone execution
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
     # Test: split existing alignments
     input_file = Path("data/raw/existing_alignments.txt")
 
-    print(f"Loading pairs from {input_file}...")
+    logger.info(f"Loading pairs from {input_file}...")
     pairs = load_aligned_pairs(input_file)
-    print(f"Loaded {len(pairs)} pairs")
+    logger.info(f"Loaded {len(pairs)} pairs")
 
-    print("\nSplitting into train/test...")
+    logger.info("Splitting into train/test...")
     train, test = split_train_test(pairs)
-    print(f"Train: {len(train)} pairs")
-    print(f"Test: {len(test)} pairs")
+    logger.info(f"Train: {len(train)} pairs")
+    logger.info(f"Test: {len(test)} pairs")
 
     # Save splits
     save_pairs(train, "data/processed/train.txt")
     save_pairs(test, "data/processed/test.txt")
 
-    print("\nSaved:")
-    print("  data/processed/train.txt")
-    print("  data/processed/test.txt")
+    logger.info("Saved:")
+    logger.info("  data/processed/train.txt")
+    logger.info("  data/processed/test.txt")
 
     # Show sample
-    print("\nSample pair:")
+    logger.info("Sample pair:")
     sample = train[0]
-    print(f"  DA: {sample['danish']}")
-    print(f"  KL: {sample['kalaallisut']}")
+    logger.info(f"  DA: {sample['danish']}")
+    logger.info(f"  KL: {sample['kalaallisut']}")
