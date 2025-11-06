@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import List, Dict, Set, Any
 from morphology import tokenize_text
+from config import config
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -97,7 +98,7 @@ class SentenceAligner:
             current += char
 
             if char in ".!?":
-                if len(current.strip()) < 5:
+                if len(current.strip()) < config.min_sentence_length:
                     continue
 
                 # Look ahead
@@ -185,11 +186,11 @@ class SentenceAligner:
         # Position similarity (prefer same relative position)
         position_score = 1.0 - abs(da_pos - kal_pos)
 
-        # Weighted combination
+        # Weighted combination (weights from config)
         similarity = (
-            0.4 * max(0, word_score)
-            + 0.3 * max(0, char_score)
-            + 0.3 * max(0, position_score)
+            config.word_score_weight * max(0, word_score)
+            + config.char_score_weight * max(0, char_score)
+            + config.position_score_weight * max(0, position_score)
         )
 
         return similarity

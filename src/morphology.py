@@ -5,18 +5,17 @@ Consolidated module for tokenization and morphological analysis using HFST tools
 """
 
 import subprocess
-import os
-import sys
 from pathlib import Path
 from typing import List, Dict, Any
 import logging
 
+from config import config
+
 logger = logging.getLogger(__name__)
 
-# Paths to lang-kal tools (support environment variable with fallback)
-LANG_KAL_ROOT = Path(os.environ.get("LANG_KAL_PATH", Path.home() / "lang-kal"))
-TOKENIZER = LANG_KAL_ROOT / "tools/tokenisers/tokeniser-disamb-gt-desc.pmhfst"
-ANALYZER = LANG_KAL_ROOT / "src/fst/analyser-gt-desc.hfst"
+# Get paths from config
+TOKENIZER = config.tokenizer_path
+ANALYZER = config.analyzer_path
 
 # Validate paths on import
 if not ANALYZER.exists():

@@ -288,10 +288,54 @@ The MIT License applies to the code and processed data in this repository. Users
 
 ## 🔧 Advanced Configuration
 
+### Configuration File
+
+The project uses a centralized configuration system. Create a `config.json` file in the project root to customize settings:
+
+```bash
+# Copy the example configuration
+cp config.json.example config.json
+
+# Edit to customize paths and parameters
+nano config.json
+```
+
+**Example `config.json`:**
+```json
+{
+  "lang_kal_path": "~/lang-kal",
+  "hunalign_path": "~/hunalign/src/hunalign/hunalign",
+  "alignment": {
+    "word_score_weight": 0.4,
+    "char_score_weight": 0.3,
+    "position_score_weight": 0.3,
+    "min_sentence_length": 5
+  },
+  "cognates": {
+    "min_word_length": 3,
+    "max_edit_distance": 2
+  }
+}
+```
+
+**Configuration Options:**
+- **`lang_kal_path`**: Path to lang-kal installation
+- **`hunalign_path`**: Path to hunalign binary
+- **`alignment.word_score_weight`**: Weight for word count similarity (default: 0.4)
+- **`alignment.char_score_weight`**: Weight for character count similarity (default: 0.3)
+- **`alignment.position_score_weight`**: Weight for sentence position similarity (default: 0.3)
+- **`alignment.min_sentence_length`**: Minimum characters for sentence splitting (default: 5)
+- **`cognates.min_word_length`**: Minimum word length for cognate extraction (default: 3)
+- **`cognates.max_edit_distance`**: Maximum edit distance for cognate matching (default: 2)
+
 ### Environment Variables
+
+Environment variables override `config.json` settings:
 
 - `LANG_KAL_PATH`: Path to lang-kal installation (default: `~/lang-kal`)
 - `HUNALIGN_PATH`: Path to hunalign binary (default: `~/hunalign/src/hunalign/hunalign`)
+
+**Priority:** Environment Variables > config.json > Default Values
 
 ### Data Version Tracking
 
