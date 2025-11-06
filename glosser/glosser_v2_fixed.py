@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import sys, json
 from pathlib import Path
+from typing import List, Dict, Optional, Any
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from preprocessor import tokenize_text, analyze_word
 
 
 class KalaallisutGlosser:
-    def __init__(self, dict_file="kalaallisut_english_dict.json"):
+    def __init__(self, dict_file: str = "kalaallisut_english_dict.json") -> None:
         """Initialize glosser with dictionary and morpheme gloss files.
 
         Args:
@@ -55,7 +56,7 @@ class KalaallisutGlosser:
 
         print(f"Loaded {len(self.kal_eng)} dictionary entries", file=sys.stderr)
 
-    def gloss_morpheme(self, morpheme):
+    def gloss_morpheme(self, morpheme: str) -> str:
         if morpheme in self.glosses["tags"]:
             return self.glosses["tags"][morpheme]
         if morpheme in self.glosses["roots"]:
@@ -64,7 +65,7 @@ class KalaallisutGlosser:
             return self.kal_eng[morpheme]
         return morpheme
 
-    def translate_root(self, root):
+    def translate_root(self, root: str) -> Optional[str]:
         if root in self.kal_eng:
             return self.kal_eng[root]
         for suffix in ["voq", "poq", "soq", "toq", "neq"]:
@@ -74,7 +75,7 @@ class KalaallisutGlosser:
                     return self.kal_eng[base]
         return None
 
-    def format_analysis(self, word, analysis):
+    def format_analysis(self, word: str, analysis: Dict[str, Any]) -> Dict[str, Any]:
         parts = analysis["analysis"].split("+")
         root, morphemes = parts[0], parts[1:]
         morpheme_line = root + ("-" + "-".join(morphemes) if morphemes else "")
@@ -88,7 +89,7 @@ class KalaallisutGlosser:
             "raw_analysis": analysis["analysis"],
         }
 
-    def gloss_text(self, text):
+    def gloss_text(self, text: str) -> List[Dict[str, Any]]:
         """Gloss Kalaallisut text with morphological analysis.
 
         Args:
@@ -150,7 +151,7 @@ class KalaallisutGlosser:
                 glossed.append(formatted)
         return glossed
 
-    def output_text(self, glossed_items):
+    def output_text(self, glossed_items: List[Dict[str, Any]]) -> str:
         output = ["═" * 70]
         for item in glossed_items:
             if item["type"] == "punctuation":
@@ -169,7 +170,7 @@ class KalaallisutGlosser:
         return "\n".join(output)
 
 
-def main():
+def main() -> int:
     """Main entry point for glosser CLI."""
     import argparse
 
