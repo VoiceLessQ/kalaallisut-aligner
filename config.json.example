@@ -1,0 +1,25 @@
+{
+  "lang_kal_path": "~/lang-kal",
+  "hunalign_path": "~/hunalign/src/hunalign/hunalign",
+  "data_paths": {
+    "raw": "data/raw",
+    "processed": "data/processed",
+    "aligned": "data/aligned",
+    "test": "data/test"
+  },
+  "alignment": {
+    "confidence_threshold": 0.5,
+    "word_score_weight": 0.4,
+    "char_score_weight": 0.3,
+    "position_score_weight": 0.3,
+    "min_sentence_length": 5
+  },
+  "cognates": {
+    "min_word_length": 3,
+    "max_edit_distance": 2
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  }
+}

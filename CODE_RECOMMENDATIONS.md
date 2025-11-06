@@ -8,7 +8,7 @@
 - **CI/CD Pipeline** - GitHub Actions with passing badge
 
 **IN PROGRESS** 🔄:
-- Phase 2 (Structure & Quality) - Type hints ✅, Code deduplication ✅, Logging (on branch), Configuration
+- Phase 2 (Structure & Quality) - Type hints ✅, Code deduplication ✅, Configuration ✅, Logging (on branch)
 - Phase 4 (Polish) - Sphinx docs, performance optimizations
 
 See [Implementation Status](#implementation-status) for details.
@@ -1135,7 +1135,7 @@ def align_documents(self, danish_text: str, kal_text: str) -> List[Dict]:
 ### Phase 2: Structure & Quality 🟠 🔄 IN PROGRESS
 1. ✅ Add type hints - **DONE** (All core modules: preprocessor, aligner, utils, glosser)
 2. ⏳ Implement logging (on feature branch)
-3. ⏳ Create configuration module
+3. ✅ Create configuration module - **DONE** (Created src/config.py with singleton pattern)
 4. ✅ Remove code duplication - **DONE** (Created src/morphology.py module)
 
 ### Phase 3: Testing 🟠 ✅ COMPLETED
@@ -1249,7 +1249,7 @@ These improvements have significantly enhanced:
 **Phase 2 (Structure & Quality)** - Highest ROI remaining:
 1. ✅ ~~Type hints~~ - **COMPLETED**
 2. Logging (easier debugging) - on feature branch
-3. Configuration module (flexibility)
+3. ✅ ~~Configuration module~~ - **COMPLETED**
 4. ✅ ~~Remove code duplication~~ - **COMPLETED**
 
 **Phase 4 (Polish)** - Nice to have:
