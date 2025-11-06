@@ -118,10 +118,10 @@ kalaallisut-aligner/
 │   ├── aligned/          # Alignment outputs
 │   └── test/             # Test data
 ├── src/
-│   ├── preprocessor.py   # Tokenization & morphology
+│   ├── morphology.py     # HFST morphological analysis (centralized)
+│   ├── preprocessor.py   # Text preprocessing & sentence processing
 │   ├── aligner.py        # Sentence alignment (backup)
-│   ├── utils.py          # Helper functions
-│   └── feature_extractor.py
+│   └── utils.py          # Helper functions (load/save pairs)
 ├── glosser/
 │   ├── glosser_v2_fixed.py           # Main glosser
 │   ├── morpheme_glosses.json         # Tag translations
@@ -129,7 +129,12 @@ kalaallisut-aligner/
 ├── scripts/
 │   ├── align_production.sh    # Production aligner
 │   ├── extract_cognates.py    # Cognate extraction
-│   └── extract_da_kal_dict.py # Dictionary extraction
+│   ├── extract_da_kal_dict.py # Dictionary extraction
+│   └── test_morphology.py     # Interactive morphology tester
+├── tests/
+│   ├── test_aligner.py        # Aligner unit tests
+│   ├── test_preprocessor.py   # Preprocessor unit tests
+│   └── test_utils.py          # Utilities unit tests
 └── docs/
     └── GUIDE.md          # Detailed usage guide
 ```
@@ -229,21 +234,36 @@ If you use this toolkit in research, please cite:
 
 And cite the underlying tools as appropriate.
 
+## 💎 Code Quality
+
+This project follows modern Python best practices:
+
+- **✅ Type Hints**: Full type annotations across all modules (List, Dict, Optional, etc.)
+- **✅ Comprehensive Testing**: 41 unit tests with pytest, CI/CD via GitHub Actions
+- **✅ Error Handling**: Robust error handling with proper exceptions and validation
+- **✅ Structured Logging**: Logging framework for debugging and monitoring
+- **✅ Code Formatting**: Black formatter with consistent style
+- **✅ Modular Design**: Centralized morphology module, no code duplication
+- **✅ Security**: Input validation, command injection prevention
+
+See [CODE_RECOMMENDATIONS.md](CODE_RECOMMENDATIONS.md) for detailed code quality documentation.
+
 ## 🤝 Contributing
 
 Contributions welcome! Please see [CODE_RECOMMENDATIONS.md](CODE_RECOMMENDATIONS.md) for detailed improvement suggestions.
 
-### Priority Areas
-- **Critical**: Error handling, security fixes, input validation
-- **High Priority**: Type hints, unit tests, logging implementation
+### Priority Areas (Updated November 2025)
+- **✅ Completed**: Type hints, error handling, security fixes, input validation, unit tests, code deduplication
+- **🔄 In Progress**: Logging implementation, configuration module
 - **Features**: Additional cognate extraction, neural alignment models, improved glossing accuracy, web interface
 
 ### Development Setup
 1. Fork the repository
 2. Create a feature branch
 3. Follow the code quality guidelines in CODE_RECOMMENDATIONS.md
-4. Add tests for new functionality
-5. Submit a pull request
+4. Add tests for new functionality (use pytest)
+5. Run `black` formatter before committing
+6. Submit a pull request
 
 See [CODE_RECOMMENDATIONS.md](CODE_RECOMMENDATIONS.md) for detailed implementation guidelines and best practices.
 
