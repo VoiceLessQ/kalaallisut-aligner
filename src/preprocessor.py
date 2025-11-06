@@ -25,7 +25,28 @@ if not ANALYZER.exists():
 
 
 def tokenize_text(text):
-    """Tokenize Kalaallisut text using lang-kal tokenizer."""
+    """Tokenize Kalaallisut text using lang-kal tokenizer.
+
+    Args:
+        text: Input text to tokenize
+
+    Returns:
+        List of tokens
+
+    Raises:
+        RuntimeError: If HFST tools are not available or tokenization fails
+        ValueError: If input text is empty
+    """
+    if not text or not text.strip():
+        raise ValueError("Input text cannot be empty")
+
+    if not TOKENIZER.exists():
+        raise RuntimeError(
+            f"Tokenizer not found at {TOKENIZER}\n"
+            f"Install lang-kal or set LANG_KAL_PATH environment variable\n"
+            f"See: https://github.com/giellalt/lang-kal"
+        )
+
     try:
         result = subprocess.run(
             ["hfst-tokenize", str(TOKENIZER)],
@@ -33,13 +54,17 @@ def tokenize_text(text):
             capture_output=True,
             text=True,
             check=True,
+            timeout=30,  # Add timeout to prevent hanging
         )
     except FileNotFoundError:
-        print(f"ERROR: hfst-tokenize not found. Install HFST tools.", file=sys.stderr)
-        return []
+        raise RuntimeError(
+            "hfst-tokenize command not found. Install HFST tools.\n"
+            "See: https://github.com/giellalt/lang-kal"
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"Tokenization timed out for text: {text[:100]}...")
     except subprocess.CalledProcessError as e:
-        print(f"ERROR: Tokenization failed: {e.stderr}", file=sys.stderr)
-        return []
+        raise RuntimeError(f"Tokenization failed: {e.stderr}")
 
     tokens = [
         line.strip() for line in result.stdout.strip().split("\n") if line.strip()
@@ -48,7 +73,31 @@ def tokenize_text(text):
 
 
 def analyze_word(word):
-    """Get morphological analysis of a word."""
+    """Get morphological analysis of a word.
+
+    Args:
+        word: Kalaallisut word to analyze
+
+    Returns:
+        List of analysis dictionaries with keys:
+        - surface: The analyzed word
+        - analysis: Morphological analysis string
+        - weight: Analysis weight (lower is better)
+
+    Raises:
+        RuntimeError: If HFST tools are not available
+        ValueError: If word is empty
+    """
+    if not word or not word.strip():
+        raise ValueError("Word cannot be empty")
+
+    if not ANALYZER.exists():
+        raise RuntimeError(
+            f"Analyzer not found at {ANALYZER}\n"
+            f"Install lang-kal or set LANG_KAL_PATH environment variable\n"
+            f"See: https://github.com/giellalt/lang-kal"
+        )
+
     try:
         result = subprocess.run(
             ["hfst-lookup", str(ANALYZER)],
@@ -56,10 +105,15 @@ def analyze_word(word):
             capture_output=True,
             text=True,
             check=False,  # hfst-lookup returns non-zero for unknown words
+            timeout=10,  # Add timeout
         )
     except FileNotFoundError:
-        print(f"ERROR: hfst-lookup not found. Install HFST tools.", file=sys.stderr)
-        return []
+        raise RuntimeError(
+            "hfst-lookup command not found. Install HFST tools.\n"
+            "See: https://github.com/giellalt/lang-kal"
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"Analysis timed out for word: {word}")
 
     # Parse output (format: word\tanalysis\tweight)
     analyses = []
@@ -80,12 +134,42 @@ def analyze_word(word):
 
 
 def process_sentence(sentence):
-    """Process a single sentence: tokenize and analyze."""
-    tokens = tokenize_text(sentence)
+    """Process a single sentence: tokenize and analyze.
+
+    Args:
+        sentence: Input sentence to process
+
+    Returns:
+        List of processed token dictionaries
+
+    Raises:
+        ValueError: If sentence is empty
+        RuntimeError: If processing fails
+    """
+    if not sentence or not sentence.strip():
+        raise ValueError("Sentence cannot be empty")
+
+    try:
+        tokens = tokenize_text(sentence)
+    except (RuntimeError, ValueError) as e:
+        raise RuntimeError(f"Tokenization failed: {e}")
 
     processed = []
     for token in tokens:
-        analysis = analyze_word(token)
+        # Skip empty tokens and punctuation
+        if not token.strip() or token in ".,;:!?":
+            continue
+
+        try:
+            analysis = analyze_word(token)
+        except ValueError:
+            # Skip empty words
+            continue
+        except RuntimeError as e:
+            # Log error but continue processing
+            print(f"Warning: Failed to analyze '{token}': {e}", file=sys.stderr)
+            analysis = []
+
         processed.append(
             {
                 "token": token,

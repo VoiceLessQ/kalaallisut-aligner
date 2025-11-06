@@ -4,21 +4,59 @@ Core alignment algorithm for Danish-Kalaallisut sentence pairs.
 """
 
 import json
+import sys
 from pathlib import Path
 from preprocessor import tokenize_text
 
 
 class SentenceAligner:
     def __init__(self, stats_file="data/processed/alignment_stats.json"):
-        """Initialize with training statistics."""
-        with open(stats_file, "r") as f:
-            self.stats = json.load(f)
+        """Initialize with training statistics.
+
+        Args:
+            stats_file: Path to JSON file with alignment statistics
+
+        Raises:
+            FileNotFoundError: If stats file doesn't exist
+            ValueError: If stats file is invalid or missing required fields
+        """
+        stats_path = Path(stats_file)
+        if not stats_path.exists():
+            raise FileNotFoundError(
+                f"Statistics file not found: {stats_file}\n"
+                f"Run data preparation scripts first."
+            )
+
+        try:
+            with open(stats_file, "r") as f:
+                self.stats = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in {stats_file}: {e}")
+
+        # Validate required fields
+        required_fields = ["avg_word_ratio", "avg_char_ratio"]
+        missing = [f for f in required_fields if f not in self.stats]
+        if missing:
+            raise ValueError(f"Missing required fields in stats: {missing}")
 
         self.expected_word_ratio = self.stats["avg_word_ratio"]  # 1.48
         self.expected_char_ratio = self.stats["avg_char_ratio"]  # 0.75
 
     def split_sentences(self, text):
-        """Split text into sentences with date-aware splitting."""
+        """Split text into sentences with date-aware splitting.
+
+        Args:
+            text: Input text to split
+
+        Returns:
+            List of sentence strings
+
+        Raises:
+            ValueError: If text is empty
+        """
+        if not text or not text.strip():
+            raise ValueError("Input text cannot be empty")
+
         # Month names in Danish and Kalaallisut
         months = {
             "januar",
@@ -89,19 +127,43 @@ class SentenceAligner:
         return sentences
 
     def calculate_similarity(self, danish_sent, kal_sent, da_pos, kal_pos):
-        """Calculate similarity score between two sentences."""
+        """Calculate similarity score between two sentences.
+
+        Args:
+            danish_sent: Danish sentence
+            kal_sent: Kalaallisut sentence
+            da_pos: Relative position of Danish sentence (0.0-1.0)
+            kal_pos: Relative position of Kalaallisut sentence (0.0-1.0)
+
+        Returns:
+            Similarity score (0.0-1.0)
+
+        Raises:
+            ValueError: If inputs are invalid
+        """
+        if not danish_sent or not danish_sent.strip():
+            raise ValueError("Danish sentence cannot be empty")
+        if not kal_sent or not kal_sent.strip():
+            raise ValueError("Kalaallisut sentence cannot be empty")
+
         # Feature extraction
         da_words = len(danish_sent.split())
         da_chars = len(danish_sent)
 
-        kal_tokens = tokenize_text(kal_sent)
+        try:
+            kal_tokens = tokenize_text(kal_sent)
+        except (RuntimeError, ValueError):
+            # If tokenization fails, fall back to simple split
+            kal_tokens = kal_sent.split()
+
         kal_words = len([t for t in kal_tokens if t.strip() and t not in ".,;:!?"])
         kal_chars = len(kal_sent)
 
-        if kal_words == 0 or kal_chars == 0:
+        # Validate all values are non-zero before division
+        if kal_words == 0 or kal_chars == 0 or da_words == 0 or da_chars == 0:
             return 0.0
 
-        # Calculate ratios
+        # Calculate ratios (safe now - all values are non-zero)
         word_ratio = da_words / kal_words
         char_ratio = da_chars / kal_chars
 
@@ -163,13 +225,39 @@ class SentenceAligner:
         return alignments
 
     def align_documents(self, danish_text, kal_text):
-        """Align two documents."""
+        """Align two documents.
+
+        Args:
+            danish_text: Danish document text
+            kal_text: Kalaallisut document text
+
+        Returns:
+            List of alignment dictionaries
+
+        Raises:
+            ValueError: If inputs are invalid
+        """
+        if not danish_text or not danish_text.strip():
+            raise ValueError("Danish text cannot be empty")
+        if not kal_text or not kal_text.strip():
+            raise ValueError("Kalaallisut text cannot be empty")
+
+        # Warn about large documents
+        if len(danish_text) > 1_000_000:
+            print(f"Warning: Large document ({len(danish_text)} chars)", file=sys.stderr)
+
         print("Splitting sentences...")
-        danish_sents = self.split_sentences(danish_text)
-        kal_sents = self.split_sentences(kal_text)
+        try:
+            danish_sents = self.split_sentences(danish_text)
+            kal_sents = self.split_sentences(kal_text)
+        except ValueError as e:
+            raise ValueError(f"Sentence splitting failed: {e}")
 
         print(f"  Danish: {len(danish_sents)} sentences")
         print(f"  Kalaallisut: {len(kal_sents)} sentences")
+
+        if not danish_sents or not kal_sents:
+            raise ValueError("No sentences found after splitting")
 
         print("\nAligning...")
         alignments = self.align_greedy(danish_sents, kal_sents)
@@ -179,10 +267,29 @@ class SentenceAligner:
         return alignments
 
     def save_alignments(self, alignments, output_file):
-        """Save alignments to file."""
-        with open(output_file, "w", encoding="utf-8") as f:
-            for align in alignments:
-                f.write(f"{align['danish']} @ {align['kalaallisut']}\n")
+        """Save alignments to file.
+
+        Args:
+            alignments: List of alignment dictionaries
+            output_file: Path to output file
+
+        Raises:
+            ValueError: If alignments is empty
+            IOError: If file cannot be written
+        """
+        if not alignments:
+            raise ValueError("Cannot save empty alignments list")
+
+        output_path = Path(output_file)
+        # Create parent directory if it doesn't exist
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            with open(output_file, "w", encoding="utf-8") as f:
+                for align in alignments:
+                    f.write(f"{align['danish']} @ {align['kalaallisut']}\n")
+        except IOError as e:
+            raise IOError(f"Failed to write to {output_file}: {e}")
 
         print(f"\nSaved to: {output_file}")
 
