@@ -7,6 +7,7 @@ import json
 import logging
 import sys
 from pathlib import Path
+from typing import List, Dict, Set, Any
 from preprocessor import tokenize_text
 
 # Set up logging
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class SentenceAligner:
-    def __init__(self, stats_file="data/processed/alignment_stats.json"):
+    def __init__(self, stats_file: str = "data/processed/alignment_stats.json") -> None:
         """Initialize with training statistics.
 
         Args:
@@ -46,7 +47,7 @@ class SentenceAligner:
         self.expected_word_ratio = self.stats["avg_word_ratio"]  # 1.48
         self.expected_char_ratio = self.stats["avg_char_ratio"]  # 0.75
 
-    def split_sentences(self, text):
+    def split_sentences(self, text: str) -> List[str]:
         """Split text into sentences with date-aware splitting.
 
         Args:
@@ -130,7 +131,9 @@ class SentenceAligner:
 
         return sentences
 
-    def calculate_similarity(self, danish_sent, kal_sent, da_pos, kal_pos):
+    def calculate_similarity(
+        self, danish_sent: str, kal_sent: str, da_pos: float, kal_pos: float
+    ) -> float:
         """Calculate similarity score between two sentences.
 
         Args:
@@ -191,10 +194,12 @@ class SentenceAligner:
 
         return similarity
 
-    def align_greedy(self, danish_sentences, kal_sentences):
+    def align_greedy(
+        self, danish_sentences: List[str], kal_sentences: List[str]
+    ) -> List[Dict[str, Any]]:
         """Greedy alignment: match each Danish sentence to best Kalaallisut."""
-        alignments = []
-        used_kal = set()
+        alignments: List[Dict[str, Any]] = []
+        used_kal: Set[int] = set()
 
         for da_idx, da_sent in enumerate(danish_sentences):
             da_pos = da_idx / len(danish_sentences)
@@ -228,7 +233,7 @@ class SentenceAligner:
 
         return alignments
 
-    def align_documents(self, danish_text, kal_text):
+    def align_documents(self, danish_text: str, kal_text: str) -> List[Dict[str, Any]]:
         """Align two documents.
 
         Args:
@@ -270,7 +275,9 @@ class SentenceAligner:
 
         return alignments
 
-    def save_alignments(self, alignments, output_file):
+    def save_alignments(
+        self, alignments: List[Dict[str, Any]], output_file: str
+    ) -> None:
         """Save alignments to file.
 
         Args:

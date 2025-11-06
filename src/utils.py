@@ -6,9 +6,10 @@ Utility functions for the aligner.
 import random
 import sys
 from pathlib import Path
+from typing import List, Dict, Tuple
 
 
-def load_aligned_pairs(filepath):
+def load_aligned_pairs(filepath: str) -> List[Dict[str, str]]:
     """Load existing aligned sentence pairs.
 
     Args:
@@ -67,7 +68,9 @@ def load_aligned_pairs(filepath):
     return pairs
 
 
-def split_train_test(pairs, test_ratio=0.2, seed=42):
+def split_train_test(
+    pairs: List[Dict[str, str]], test_ratio: float = 0.2, seed: int = 42
+) -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
     """Split data into train/test sets.
 
     Args:
@@ -108,7 +111,7 @@ def split_train_test(pairs, test_ratio=0.2, seed=42):
     return train, test
 
 
-def save_pairs(pairs, filepath):
+def save_pairs(pairs: List[Dict[str, str]], filepath: str) -> None:
     """Save pairs to file.
 
     Args:

@@ -10,6 +10,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import List, Dict, Any
 
 # Set up logging
 logging.basicConfig(
@@ -29,7 +30,7 @@ if not ANALYZER.exists():
     logger.error("See: https://github.com/giellalt/lang-kal")
 
 
-def tokenize_text(text):
+def tokenize_text(text: str) -> List[str]:
     """Tokenize Kalaallisut text using lang-kal tokenizer.
 
     Args:
@@ -77,7 +78,7 @@ def tokenize_text(text):
     return tokens
 
 
-def analyze_word(word):
+def analyze_word(word: str) -> List[Dict[str, Any]]:
     """Get morphological analysis of a word.
 
     Args:
@@ -138,7 +139,7 @@ def analyze_word(word):
     return analyses
 
 
-def process_sentence(sentence):
+def process_sentence(sentence: str) -> List[Dict[str, Any]]:
     """Process a single sentence: tokenize and analyze.
 
     Args:
