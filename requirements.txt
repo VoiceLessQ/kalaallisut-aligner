@@ -15,6 +15,10 @@ pytest-cov>=4.0.0  # Test coverage
 black>=22.0.0  # Code formatting
 mypy>=0.990  # Type checking
 
+# Documentation
+sphinx>=5.0.0  # Documentation generation
+sphinx-rtd-theme>=1.2.0  # Read the Docs theme
+
 # Note: System dependencies (not installable via pip):
 # - hunalign: https://github.com/danielvarga/hunalign
 # - lang-kal (HFST tools): https://github.com/giellalt/lang-kal

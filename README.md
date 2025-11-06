@@ -85,6 +85,30 @@ python3 scripts/extract_cognates.py
 
 ## 📚 Documentation
 
+### API Documentation
+
+Full API documentation is available via Sphinx:
+
+```bash
+# Install documentation dependencies
+pip3 install sphinx sphinx-rtd-theme
+
+# Build HTML documentation
+cd docs
+make html
+
+# View documentation
+# Open docs/build/html/index.html in your browser
+```
+
+The API documentation includes:
+- **Morphology Module** - HFST tokenization and analysis functions
+- **Aligner Module** - Sentence alignment algorithms
+- **Preprocessor Module** - Text preprocessing and sentence splitting
+- **Utils Module** - Helper functions for loading/saving pairs
+- **Glosser Module** - Morpheme-by-morpheme glossing
+- **Config Module** - Centralized configuration management
+
 ### Project Documentation
 - **[CODE_RECOMMENDATIONS.md](CODE_RECOMMENDATIONS.md)** - Comprehensive code improvement guide
   - Critical fixes (error handling, security)
