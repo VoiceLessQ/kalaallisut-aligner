@@ -6,9 +6,16 @@ Uses lang-kal tools for tokenization and morphological analysis.
 
 import subprocess
 import json
+import logging
 import os
 import sys
 from pathlib import Path
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 # Paths to lang-kal tools (support environment variable with fallback)
 LANG_KAL_ROOT = Path(os.environ.get("LANG_KAL_PATH", Path.home() / "lang-kal"))
@@ -17,11 +24,9 @@ ANALYZER = LANG_KAL_ROOT / "src/fst/analyser-gt-desc.hfst"
 
 # Validate paths on import
 if not ANALYZER.exists():
-    print(f"ERROR: lang-kal analyzer not found at {ANALYZER}", file=sys.stderr)
-    print(
-        f"Install lang-kal or set LANG_KAL_PATH environment variable", file=sys.stderr
-    )
-    print(f"See: https://github.com/giellalt/lang-kal", file=sys.stderr)
+    logger.error(f"lang-kal analyzer not found at {ANALYZER}")
+    logger.error("Install lang-kal or set LANG_KAL_PATH environment variable")
+    logger.error("See: https://github.com/giellalt/lang-kal")
 
 
 def tokenize_text(text):
@@ -167,7 +172,7 @@ def process_sentence(sentence):
             continue
         except RuntimeError as e:
             # Log error but continue processing
-            print(f"Warning: Failed to analyze '{token}': {e}", file=sys.stderr)
+            logger.warning(f"Failed to analyze '{token}': {e}")
             analysis = []
 
         processed.append(
