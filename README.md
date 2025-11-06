@@ -81,6 +81,31 @@ python3 scripts/extract_cognates.py
 # Creates: data/processed/cognates.json
 ```
 
+## 📚 Documentation
+
+### Project Documentation
+- **[CODE_RECOMMENDATIONS.md](CODE_RECOMMENDATIONS.md)** - Comprehensive code improvement guide
+  - Critical fixes (error handling, security)
+  - Best practices (type hints, logging, testing)
+  - Performance optimizations
+  - Implementation roadmap
+
+- **[BROWSER_EXTENSION_FEASIBILITY.md](BROWSER_EXTENSION_FEASIBILITY.md)** - Browser extension analysis
+  - Feasibility assessment for creating a browser extension
+  - Four architectural approaches evaluated
+  - Implementation plan and cost estimates
+  - Technical specifications and use cases
+
+- **[REFERENCE_ANALYSIS.md](REFERENCE_ANALYSIS.md)** - Academic reference analysis
+  - Detailed analysis of all cited tools and papers
+  - License compatibility review
+  - Data source documentation
+
+- **[ANALYSIS.md](ANALYSIS.md)** - Project analysis and overview
+  - Comprehensive project assessment
+  - Feature breakdown and capabilities
+  - Development recommendations
+
 ## 📁 Project Structure
 
 ```
@@ -204,11 +229,21 @@ And cite the underlying tools as appropriate.
 
 ## 🤝 Contributing
 
-Contributions welcome! Areas for improvement:
-- Additional cognate extraction
-- Neural alignment models
-- Improved glossing accuracy
-- Web interface
+Contributions welcome! Please see [CODE_RECOMMENDATIONS.md](CODE_RECOMMENDATIONS.md) for detailed improvement suggestions.
+
+### Priority Areas
+- **Critical**: Error handling, security fixes, input validation
+- **High Priority**: Type hints, unit tests, logging implementation
+- **Features**: Additional cognate extraction, neural alignment models, improved glossing accuracy, web interface
+
+### Development Setup
+1. Fork the repository
+2. Create a feature branch
+3. Follow the code quality guidelines in CODE_RECOMMENDATIONS.md
+4. Add tests for new functionality
+5. Submit a pull request
+
+See [CODE_RECOMMENDATIONS.md](CODE_RECOMMENDATIONS.md) for detailed implementation guidelines and best practices.
 
 ## 📄 License
 
