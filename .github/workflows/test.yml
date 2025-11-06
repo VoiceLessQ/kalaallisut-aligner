@@ -17,14 +17,12 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-    
+        pip install pytest pytest-cov black
+
     - name: Check code formatting
       run: |
-        pip install black
         black --check src/ scripts/ glosser/
-    
-    - name: Run tests (if available)
+
+    - name: Run tests
       run: |
-        if [ -d "tests" ]; then
-          python -m pytest tests/
-        fi
+        pytest tests/ -v -m "not integration"
