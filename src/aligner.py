@@ -8,7 +8,7 @@ import logging
 import sys
 from pathlib import Path
 from typing import List, Dict, Set, Any
-from preprocessor import tokenize_text
+from morphology import tokenize_text
 
 # Set up logging
 logger = logging.getLogger(__name__)
