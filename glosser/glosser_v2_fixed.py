@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Dict, Optional, Any
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-from preprocessor import tokenize_text, analyze_word
+from morphology import tokenize_text, analyze_word
 
 # Set up logging
 logger = logging.getLogger(__name__)

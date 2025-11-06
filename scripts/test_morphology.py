@@ -3,55 +3,12 @@
 Interactive Kalaallisut morphological analysis tester.
 """
 
-import subprocess
-import os
 import sys
 from pathlib import Path
 
-# Support environment variable with fallback to default location
-LANG_KAL_ROOT = Path(os.environ.get("LANG_KAL_PATH", Path.home() / "lang-kal"))
-ANALYZER = LANG_KAL_ROOT / "src/fst/analyser-gt-desc.hfst"
-
-# Validate analyzer exists
-if not ANALYZER.exists():
-    print(f"ERROR: lang-kal analyzer not found at {ANALYZER}", file=sys.stderr)
-    print(
-        f"Install lang-kal or set LANG_KAL_PATH environment variable", file=sys.stderr
-    )
-    print(f"See: https://github.com/giellalt/lang-kal", file=sys.stderr)
-    sys.exit(1)
-
-
-def analyze_word(word):
-    """Analyze a single word."""
-    try:
-        result = subprocess.run(
-            ["hfst-lookup", str(ANALYZER)],
-            input=word,
-            capture_output=True,
-            text=True,
-            check=False,  # hfst-lookup returns non-zero for unknown words
-        )
-    except FileNotFoundError:
-        print(f"ERROR: hfst-lookup not found. Install HFST tools.", file=sys.stderr)
-        print(f"See: https://github.com/giellalt/lang-kal", file=sys.stderr)
-        return []
-
-    analyses = []
-    for line in result.stdout.strip().split("\n"):
-        if line.startswith(">") or not line.strip():
-            continue
-        parts = line.split("\t")
-        if len(parts) >= 2:
-            analyses.append(
-                {
-                    "surface": parts[0],
-                    "analysis": parts[1],
-                    "weight": float(parts[2]) if len(parts) > 2 else 0.0,
-                }
-            )
-
-    return analyses
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from morphology import analyze_word
 
 
 def explain_morphology(analysis_str):
@@ -123,7 +80,11 @@ def interactive_mode():
         print(f"\nAnalyzing: {word}")
         print("-" * 60)
 
-        analyses = analyze_word(word)
+        try:
+            analyses = analyze_word(word)
+        except (RuntimeError, ValueError) as e:
+            print(f"❌ Error: {e}")
+            analyses = []
 
         if not analyses:
             print("❌ No analysis found (unknown word or not in lexicon)")
@@ -142,7 +103,11 @@ def batch_mode(words):
 
     for word in words:
         print(f"Word: {word}")
-        analyses = analyze_word(word)
+        try:
+            analyses = analyze_word(word)
+        except (RuntimeError, ValueError) as e:
+            print(f"❌ Error: {e}")
+            analyses = []
 
         if analyses:
             # Show only first analysis

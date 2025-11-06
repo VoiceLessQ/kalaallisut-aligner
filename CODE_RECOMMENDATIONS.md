@@ -8,7 +8,7 @@
 - **CI/CD Pipeline** - GitHub Actions with passing badge
 
 **IN PROGRESS** 🔄:
-- Phase 2 (Structure & Quality) - Type hints ✅ COMPLETED, logging (on branch), configuration, code deduplication
+- Phase 2 (Structure & Quality) - Type hints ✅, Code deduplication ✅, Logging (on branch), Configuration
 - Phase 4 (Polish) - Sphinx docs, performance optimizations
 
 See [Implementation Status](#implementation-status) for details.
@@ -1136,7 +1136,7 @@ def align_documents(self, danish_text: str, kal_text: str) -> List[Dict]:
 1. ✅ Add type hints - **DONE** (All core modules: preprocessor, aligner, utils, glosser)
 2. ⏳ Implement logging (on feature branch)
 3. ⏳ Create configuration module
-4. ⏳ Remove code duplication
+4. ✅ Remove code duplication - **DONE** (Created src/morphology.py module)
 
 ### Phase 3: Testing 🟠 ✅ COMPLETED
 1. ✅ Set up pytest - **DONE**
@@ -1250,7 +1250,7 @@ These improvements have significantly enhanced:
 1. ✅ ~~Type hints~~ - **COMPLETED**
 2. Logging (easier debugging) - on feature branch
 3. Configuration module (flexibility)
-4. Remove code duplication
+4. ✅ ~~Remove code duplication~~ - **COMPLETED**
 
 **Phase 4 (Polish)** - Nice to have:
 1. Sphinx documentation
@@ -1263,4 +1263,4 @@ These improvements have significantly enhanced:
 **Updated**: November 2025
 **For**: Kalaallisut-Danish Sentence Aligner
 **Status**: ✅ **Production Ready** (Critical issues resolved)
-**Next Priority**: Phase 2 (Logging, configuration, code deduplication)
+**Next Priority**: Phase 2 (Logging, Configuration module)
