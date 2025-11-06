@@ -244,7 +244,9 @@ class SentenceAligner:
 
         # Warn about large documents
         if len(danish_text) > 1_000_000:
-            print(f"Warning: Large document ({len(danish_text)} chars)", file=sys.stderr)
+            print(
+                f"Warning: Large document ({len(danish_text)} chars)", file=sys.stderr
+            )
 
         print("Splitting sentences...")
         try:
