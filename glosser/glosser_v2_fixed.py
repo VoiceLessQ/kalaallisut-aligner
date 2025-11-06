@@ -8,11 +8,49 @@ from preprocessor import tokenize_text, analyze_word
 
 class KalaallisutGlosser:
     def __init__(self, dict_file="kalaallisut_english_dict.json"):
+        """Initialize glosser with dictionary and morpheme gloss files.
+
+        Args:
+            dict_file: Name of dictionary JSON file
+
+        Raises:
+            FileNotFoundError: If dictionary files don't exist
+            ValueError: If JSON files are invalid
+        """
         dict_path = Path(__file__).parent / dict_file
-        with open(dict_path, "r", encoding="utf-8") as f:
-            self.kal_eng = json.load(f)
-        with open(Path(__file__).parent / "morpheme_glosses.json", "r") as f:
-            self.glosses = json.load(f)
+        morpheme_path = Path(__file__).parent / "morpheme_glosses.json"
+
+        if not dict_path.exists():
+            raise FileNotFoundError(
+                f"Dictionary not found: {dict_path}\n"
+                f"Ensure {dict_file} exists in glosser/ directory"
+            )
+
+        if not morpheme_path.exists():
+            raise FileNotFoundError(
+                f"Morpheme glosses not found: {morpheme_path}\n"
+                f"Ensure morpheme_glosses.json exists in glosser/ directory"
+            )
+
+        try:
+            with open(dict_path, "r", encoding="utf-8") as f:
+                self.kal_eng = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in {dict_path}: {e}")
+
+        try:
+            with open(morpheme_path, "r") as f:
+                self.glosses = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in {morpheme_path}: {e}")
+
+        # Validate structure
+        if not isinstance(self.kal_eng, dict):
+            raise ValueError(f"Dictionary must be a JSON object, got {type(self.kal_eng)}")
+
+        if "tags" not in self.glosses or "roots" not in self.glosses:
+            raise ValueError("morpheme_glosses.json must have 'tags' and 'roots' keys")
+
         print(f"Loaded {len(self.kal_eng)} dictionary entries", file=sys.stderr)
 
     def gloss_morpheme(self, morpheme):
@@ -49,14 +87,42 @@ class KalaallisutGlosser:
         }
 
     def gloss_text(self, text):
-        tokens = tokenize_text(text)
+        """Gloss Kalaallisut text with morphological analysis.
+
+        Args:
+            text: Input Kalaallisut text
+
+        Returns:
+            List of glossed token dictionaries
+
+        Raises:
+            ValueError: If text is empty
+            RuntimeError: If tokenization or analysis fails
+        """
+        if not text or not text.strip():
+            raise ValueError("Input text cannot be empty")
+
+        try:
+            tokens = tokenize_text(text)
+        except (RuntimeError, ValueError) as e:
+            raise RuntimeError(f"Tokenization failed: {e}")
+
         glossed = []
         for token in tokens:
             if token.strip() in ".,;:!?":
                 glossed.append({"surface": token, "type": "punctuation"})
                 continue
 
-            analyses = analyze_word(token)
+            try:
+                analyses = analyze_word(token)
+            except ValueError:
+                # Empty token, skip
+                continue
+            except RuntimeError as e:
+                # Analysis failed, treat as unknown
+                print(f"Warning: Failed to analyze '{token}': {e}", file=sys.stderr)
+                analyses = []
+
             if not analyses:
                 glossed.append(
                     {
@@ -102,25 +168,73 @@ class KalaallisutGlosser:
 
 
 def main():
+    """Main entry point for glosser CLI."""
     import argparse
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input", nargs="?")
-    parser.add_argument("-f", "--format", choices=["text", "html"], default="text")
-    parser.add_argument("-o", "--output")
+    parser = argparse.ArgumentParser(
+        description="Gloss Kalaallisut text with morphological analysis",
+        epilog="Example: python glosser_v2_fixed.py input.txt -o output.txt",
+    )
+    parser.add_argument("input", nargs="?", help="Input file (default: stdin)")
+    parser.add_argument(
+        "-f", "--format", choices=["text", "html"], default="text", help="Output format"
+    )
+    parser.add_argument("-o", "--output", help="Output file (default: stdout)")
     args = parser.parse_args()
 
-    text = open(args.input, encoding="utf-8").read() if args.input else sys.stdin.read()
+    # Read input
+    try:
+        if args.input:
+            input_path = Path(args.input)
+            if not input_path.exists():
+                print(f"Error: Input file not found: {args.input}", file=sys.stderr)
+                return 1
+            with open(args.input, encoding="utf-8") as f:
+                text = f.read()
+        else:
+            text = sys.stdin.read()
+    except IOError as e:
+        print(f"Error reading input: {e}", file=sys.stderr)
+        return 1
+    except UnicodeDecodeError as e:
+        print(f"Error: Invalid encoding in input file: {e}", file=sys.stderr)
+        return 1
 
-    glosser = KalaallisutGlosser()
-    glossed = glosser.gloss_text(text)
+    if not text.strip():
+        print("Error: Input text is empty", file=sys.stderr)
+        return 1
+
+    # Initialize glosser and process
+    try:
+        glosser = KalaallisutGlosser()
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error initializing glosser: {e}", file=sys.stderr)
+        return 1
+
+    try:
+        glossed = glosser.gloss_text(text)
+    except (ValueError, RuntimeError) as e:
+        print(f"Error glossing text: {e}", file=sys.stderr)
+        return 1
+
     output = glosser.output_text(glossed)
 
-    if args.output:
-        open(args.output, "w", encoding="utf-8").write(output)
-    else:
-        print(output)
+    # Write output
+    try:
+        if args.output:
+            output_path = Path(args.output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write(output)
+            print(f"Output written to: {args.output}", file=sys.stderr)
+        else:
+            print(output)
+    except IOError as e:
+        print(f"Error writing output: {e}", file=sys.stderr)
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
