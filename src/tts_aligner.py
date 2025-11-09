@@ -25,19 +25,41 @@ class MarthaTTS:
     Client for Oqaasileriffik's Martha TTS API.
 
     API Endpoint: https://oqaasileriffik.gl/martha/tts/
-    Audio Files: https://oqaasileriffik.gl/martha/data/
+    Audio Files: https://oqaasileriffik.gl/martha/data/{dir1}/{dir2}/{filename}
+
+    NOTE: The public API may return "Access denied" (403) for programmatic access.
+    Workarounds:
+    1. Self-host using Docker: https://github.com/Oqaasileriffik/martha/tree/main/docker
+    2. Use from browser (works with CORS)
+    3. Contact Oqaasileriffik for API access
 
     Attributes:
         api_url: Martha TTS API endpoint
-        data_url: Base URL for generated audio files
+        data_url_template: Template for audio file URLs
         max_chars: Maximum characters per request (10,000)
     """
 
-    def __init__(self):
-        self.api_url = "https://oqaasileriffik.gl/martha/tts/"
-        self.data_url = "https://oqaasileriffik.gl/martha/data/"
+    def __init__(self, api_url: Optional[str] = None):
+        """
+        Initialize Martha TTS client.
+
+        Args:
+            api_url: Custom API URL (e.g., self-hosted Docker instance)
+                    Default: https://oqaasileriffik.gl/martha/tts/
+        """
+        self.api_url = api_url or "https://oqaasileriffik.gl/martha/tts/"
+        self.data_url_base = "https://oqaasileriffik.gl/martha/data/"
         self.max_chars = 10000
         self.session = requests.Session()
+
+        # Add browser-like headers to help with CORS
+        self.session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (compatible; KalaallisutAligner/1.0)",
+                "Accept": "application/json, text/javascript, */*; q=0.01",
+                "Accept-Language": "en-US,en;q=0.9",
+            }
+        )
 
     def synthesize(self, text: str, timeout: int = 30) -> Optional[Dict]:
         """
