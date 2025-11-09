@@ -68,9 +68,7 @@ class MarthaTTS:
             logger.info(f"Sending TTS request for {len(text)} characters")
 
             response = self.session.post(
-                self.api_url,
-                data={"text": text},
-                timeout=timeout
+                self.api_url, data={"text": text}, timeout=timeout
             )
             response.raise_for_status()
 
@@ -122,9 +120,7 @@ class MarthaTTS:
             raise
 
     def batch_synthesize(
-        self,
-        texts: List[str],
-        delay: float = 1.0
+        self, texts: List[str], delay: float = 1.0
     ) -> List[Optional[Dict]]:
         """
         Synthesize multiple texts with rate limiting.
@@ -171,6 +167,7 @@ class TTSBasedAligner:
         # Try to import audio processing libraries
         try:
             import librosa
+
             self.librosa = librosa
         except ImportError:
             logger.warning(
@@ -181,6 +178,7 @@ class TTSBasedAligner:
 
         try:
             from dtaidistance import dtw
+
             self.dtw = dtw
         except ImportError:
             logger.warning(
@@ -218,10 +216,7 @@ class TTSBasedAligner:
             raise
 
     def align_audio(
-        self,
-        source_audio: Path,
-        text: str,
-        output_dir: Optional[Path] = None
+        self, source_audio: Path, text: str, output_dir: Optional[Path] = None
     ) -> Dict:
         """
         Perform forced alignment using TTS-based approach.
@@ -275,7 +270,7 @@ class TTSBasedAligner:
             tts_response.get("ts", []),
             path,
             source_mfcc.shape[1],
-            tts_response.get("du", 0)
+            tts_response.get("du", 0),
         )
 
         return {
@@ -283,7 +278,7 @@ class TTSBasedAligner:
             "dtw_path": path,
             "dtw_distance": distance,
             "tts_response": tts_response,
-            "reference_audio": str(ref_audio_path)
+            "reference_audio": str(ref_audio_path),
         }
 
     def _compute_dtw(self, source_seq, ref_seq) -> Tuple[float, List]:
@@ -311,7 +306,7 @@ class TTSBasedAligner:
         tts_timestamps: List,
         dtw_path: List,
         source_frames: int,
-        ref_duration: float
+        ref_duration: float,
     ) -> List[Tuple[str, float, float]]:
         """
         Map TTS word timestamps to source audio using DTW path.
@@ -331,7 +326,9 @@ class TTSBasedAligner:
         # 3. Convert source frames back to seconds
 
         # For now, return the original TTS timestamps as a starting point
-        logger.warning("Timestamp mapping not fully implemented - returning TTS timestamps")
+        logger.warning(
+            "Timestamp mapping not fully implemented - returning TTS timestamps"
+        )
 
         if not tts_timestamps:
             return []
@@ -366,7 +363,7 @@ def main():
         print(f"Size: {result['sz']} bytes")
         print(f"Download: {result['audio_url']}")
 
-        if 'ts' in result:
+        if "ts" in result:
             print(f"Timestamps: {result['ts']}")
 
     except Exception as e:
@@ -374,11 +371,7 @@ def main():
 
     # Example 2: Batch synthesis
     print("\n=== Example 2: Batch Synthesis ===")
-    texts = [
-        "Aasaqqussuaq",
-        "Kalaallit Nunaat",
-        "Imaqa"
-    ]
+    texts = ["Aasaqqussuaq", "Kalaallit Nunaat", "Imaqa"]
 
     try:
         results = tts.batch_synthesize(texts, delay=2.0)

@@ -21,6 +21,7 @@ import json
 try:
     import librosa
     import numpy as np
+
     AUDIO_AVAILABLE = True
 except ImportError:
     AUDIO_AVAILABLE = False
@@ -28,6 +29,7 @@ except ImportError:
 
 try:
     from dtaidistance import dtw
+
     DTW_AVAILABLE = True
 except ImportError:
     DTW_AVAILABLE = False
@@ -52,9 +54,7 @@ class AudioTranscriber:
     """
 
     def __init__(
-        self,
-        corpus_path: Optional[Path] = None,
-        cache_dir: Optional[Path] = None
+        self, corpus_path: Optional[Path] = None, cache_dir: Optional[Path] = None
     ):
         """
         Initialize transcriber.
@@ -96,10 +96,7 @@ class AudioTranscriber:
             return []
 
     def extract_mfcc(
-        self,
-        audio_path: Path,
-        n_mfcc: int = 13,
-        sr: int = 16000
+        self, audio_path: Path, n_mfcc: int = 13, sr: int = 16000
     ) -> np.ndarray:
         """
         Extract MFCC features from audio.
@@ -133,9 +130,7 @@ class AudioTranscriber:
             raise
 
     def compute_similarity(
-        self,
-        source_mfcc: np.ndarray,
-        candidate_mfcc: np.ndarray
+        self, source_mfcc: np.ndarray, candidate_mfcc: np.ndarray
     ) -> float:
         """
         Compute DTW similarity between two audio features.
@@ -160,10 +155,7 @@ class AudioTranscriber:
             raise
 
     def filter_candidates_by_duration(
-        self,
-        audio_duration: float,
-        candidates: List[str],
-        tolerance: float = 0.3
+        self, audio_duration: float, candidates: List[str], tolerance: float = 0.3
     ) -> List[str]:
         """
         Filter candidates by estimated duration.
@@ -182,10 +174,7 @@ class AudioTranscriber:
         min_chars = int(audio_duration * chars_per_second * (1 - tolerance))
         max_chars = int(audio_duration * chars_per_second * (1 + tolerance))
 
-        filtered = [
-            c for c in candidates
-            if min_chars <= len(c) <= max_chars
-        ]
+        filtered = [c for c in candidates if min_chars <= len(c) <= max_chars]
 
         logger.info(
             f"Filtered {len(candidates)} → {len(filtered)} candidates "
@@ -199,7 +188,7 @@ class AudioTranscriber:
         audio_path: Path,
         top_k: int = 5,
         max_candidates: int = 100,
-        delay_between_requests: float = 1.5
+        delay_between_requests: float = 1.5,
     ) -> List[Tuple[str, float]]:
         """
         Transcribe audio by finding best matching text from candidates.
@@ -226,9 +215,7 @@ class AudioTranscriber:
 
         # Filter candidates by duration
         candidates = self.filter_candidates_by_duration(
-            audio_duration,
-            self.candidates,
-            tolerance=0.3
+            audio_duration, self.candidates, tolerance=0.3
         )
 
         # Limit candidates
@@ -248,13 +235,13 @@ class AudioTranscriber:
                 # Generate TTS audio
                 tts_result = self.tts.synthesize(candidate_text)
 
-                if not tts_result or 'audio_url' not in tts_result:
+                if not tts_result or "audio_url" not in tts_result:
                     logger.warning(f"TTS failed for: {candidate_text[:30]}")
                     continue
 
                 # Download audio
                 cache_filename = self.cache_dir / f"candidate_{i:04d}.mp3"
-                self.tts.download_audio(tts_result['audio_url'], cache_filename)
+                self.tts.download_audio(tts_result["audio_url"], cache_filename)
 
                 # Extract features
                 candidate_mfcc = self.extract_mfcc(cache_filename)
@@ -290,10 +277,7 @@ class AudioTranscriber:
         return top_results
 
     def transcribe_batch(
-        self,
-        audio_files: List[Path],
-        output_json: Optional[Path] = None,
-        **kwargs
+        self, audio_files: List[Path], output_json: Optional[Path] = None, **kwargs
     ) -> Dict[str, List[Tuple[str, float]]]:
         """
         Transcribe multiple audio files.
@@ -311,7 +295,7 @@ class AudioTranscriber:
         for audio_file in audio_files:
             logger.info(f"\n{'='*60}")
             logger.info(f"Processing: {audio_file}")
-            logger.info('='*60)
+            logger.info("=" * 60)
 
             try:
                 matches = self.transcribe(audio_file, **kwargs)
@@ -324,7 +308,7 @@ class AudioTranscriber:
         # Save results
         if output_json:
             output_json.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_json, 'w', encoding='utf-8') as f:
+            with open(output_json, "w", encoding="utf-8") as f:
                 # Convert to serializable format
                 output = {
                     path: [(text, float(score)) for text, score in matches]
@@ -343,52 +327,38 @@ def main():
         description="Transcribe Kalaallisut audio using TTS similarity matching"
     )
     parser.add_argument(
-        'audio',
-        type=Path,
-        help="Audio file to transcribe (.wav, .mp3, etc.)"
+        "audio", type=Path, help="Audio file to transcribe (.wav, .mp3, etc.)"
     )
     parser.add_argument(
-        '--corpus',
+        "--corpus",
         type=Path,
         default=Path("data/aligned/corpus_6798_pairs.txt"),
-        help="Path to aligned corpus for candidates"
+        help="Path to aligned corpus for candidates",
     )
     parser.add_argument(
-        '--top',
-        type=int,
-        default=5,
-        help="Return top K matches (default: 5)"
+        "--top", type=int, default=5, help="Return top K matches (default: 5)"
     )
     parser.add_argument(
-        '--max-candidates',
+        "--max-candidates",
         type=int,
         default=100,
-        help="Maximum candidates to test (default: 100)"
+        help="Maximum candidates to test (default: 100)",
     )
     parser.add_argument(
-        '--delay',
+        "--delay",
         type=float,
         default=1.5,
-        help="Delay between TTS requests in seconds (default: 1.5)"
+        help="Delay between TTS requests in seconds (default: 1.5)",
     )
-    parser.add_argument(
-        '--output',
-        type=Path,
-        help="Save results to JSON file"
-    )
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help="Enable verbose logging"
-    )
+    parser.add_argument("--output", type=Path, help="Save results to JSON file")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
     args = parser.parse_args()
 
     # Setup logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(
-        level=log_level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
 
     # Check dependencies
@@ -397,7 +367,9 @@ def main():
         return 1
 
     if not DTW_AVAILABLE:
-        logger.error("dtaidistance not installed. Install with: pip install dtaidistance")
+        logger.error(
+            "dtaidistance not installed. Install with: pip install dtaidistance"
+        )
         return 1
 
     # Check audio file exists
@@ -418,13 +390,13 @@ def main():
             audio_path=args.audio,
             top_k=args.top,
             max_candidates=args.max_candidates,
-            delay_between_requests=args.delay
+            delay_between_requests=args.delay,
         )
 
         # Print results
         print(f"\n{'='*60}")
         print(f"TRANSCRIPTION RESULTS: {args.audio}")
-        print('='*60)
+        print("=" * 60)
 
         for i, (text, score) in enumerate(results, 1):
             print(f"\n{i}. [Distance: {score:.2f}]")
@@ -437,10 +409,10 @@ def main():
                 "matches": [
                     {"rank": i, "text": text, "distance": float(score)}
                     for i, (text, score) in enumerate(results, 1)
-                ]
+                ],
             }
 
-            with open(args.output, 'w', encoding='utf-8') as f:
+            with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(output_data, f, ensure_ascii=False, indent=2)
 
             print(f"\nResults saved to: {args.output}")
