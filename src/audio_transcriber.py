@@ -36,6 +36,7 @@ except ImportError:
     logging.warning("dtaidistance not installed - DTW alignment unavailable")
 
 from tts_aligner import MarthaTTS
+from google_tts import GoogleKalaallisutTTS
 from utils import load_aligned_pairs
 
 logger = logging.getLogger(__name__)
@@ -47,14 +48,17 @@ class AudioTranscriber:
 
     This "reverse engineers" transcription by:
     - Generating candidate texts
-    - Using Martha TTS to synthesize audio for each
+    - Using TTS (Google or Martha) to synthesize audio for each
     - Finding which candidate sounds most similar to your audio
 
     No ASR model required!
     """
 
     def __init__(
-        self, corpus_path: Optional[Path] = None, cache_dir: Optional[Path] = None
+        self,
+        corpus_path: Optional[Path] = None,
+        cache_dir: Optional[Path] = None,
+        tts_backend: str = "google",
     ):
         """
         Initialize transcriber.
@@ -62,8 +66,19 @@ class AudioTranscriber:
         Args:
             corpus_path: Path to aligned corpus for candidates
             cache_dir: Where to cache TTS audio files
+            tts_backend: TTS backend to use ("google" or "martha")
         """
-        self.tts = MarthaTTS()
+        # Initialize TTS backend
+        if tts_backend == "google":
+            self.tts = GoogleKalaallisutTTS()
+            self.tts_type = "google"
+            logger.info("Using Google TTS backend")
+        elif tts_backend == "martha":
+            self.tts = MarthaTTS()
+            self.tts_type = "martha"
+            logger.info("Using Martha TTS backend")
+        else:
+            raise ValueError(f"Unknown TTS backend: {tts_backend}")
         self.corpus_path = corpus_path or Path("data/aligned/corpus_6798_pairs.txt")
         self.cache_dir = cache_dir or Path("data/tts_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -235,13 +250,29 @@ class AudioTranscriber:
                 # Generate TTS audio
                 tts_result = self.tts.synthesize(candidate_text)
 
-                if not tts_result or "audio_url" not in tts_result:
+                if not tts_result:
                     logger.warning(f"TTS failed for: {candidate_text[:30]}")
                     continue
 
-                # Download audio
+                # Save audio to cache
                 cache_filename = self.cache_dir / f"candidate_{i:04d}.mp3"
-                self.tts.download_audio(tts_result["audio_url"], cache_filename)
+
+                if self.tts_type == "google":
+                    # Google TTS returns audio_data directly
+                    if "audio_data" not in tts_result:
+                        logger.warning(
+                            f"Google TTS missing audio_data: {candidate_text[:30]}"
+                        )
+                        continue
+                    cache_filename.write_bytes(tts_result["audio_data"])
+                elif self.tts_type == "martha":
+                    # Martha TTS returns audio_url to download
+                    if "audio_url" not in tts_result:
+                        logger.warning(
+                            f"Martha TTS missing audio_url: {candidate_text[:30]}"
+                        )
+                        continue
+                    self.tts.download_audio(tts_result["audio_url"], cache_filename)
 
                 # Extract features
                 candidate_mfcc = self.extract_mfcc(cache_filename)
@@ -351,6 +382,13 @@ def main():
         help="Delay between TTS requests in seconds (default: 1.5)",
     )
     parser.add_argument("--output", type=Path, help="Save results to JSON file")
+    parser.add_argument(
+        "--tts-backend",
+        type=str,
+        default="google",
+        choices=["google", "martha"],
+        help="TTS backend to use (default: google)",
+    )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
     args = parser.parse_args()
@@ -379,7 +417,9 @@ def main():
 
     # Initialize transcriber
     try:
-        transcriber = AudioTranscriber(corpus_path=args.corpus)
+        transcriber = AudioTranscriber(
+            corpus_path=args.corpus, tts_backend=args.tts_backend
+        )
     except Exception as e:
         logger.error(f"Failed to initialize transcriber: {e}")
         return 1
