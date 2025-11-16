@@ -13,10 +13,11 @@ Complete NLP toolkit for Kalaallisut language processing and Danish-Kalaallisut 
 - **Cognate Extractor** - 1,526 Danish-Kalaallisut shared terms
 
 ### 📊 Dataset
-- **6,812 aligned sentence pairs** (5,450 train / 1,362 test)
-- Extracted from parallel Danish-Kalaallisut government documents
+- **8,178 aligned sentence pairs** (train) + 1,362 test pairs
+- Extracted from parallel Danish-Kalaallisut government documents and news corpus
 - Smart date-aware sentence splitting
-- Avg word ratio: 1.36 (Danish/Kalaallisut)
+- Avg word ratio: 1.55 (Danish/Kalaallisut)
+- Avg char ratio: 0.80 (Danish/Kalaallisut)
 
 ## 🚀 Quick Start
 
@@ -49,7 +50,25 @@ chmod +x scripts/*.sh
 
 ## 📖 Usage
 
-### 1. Align Documents
+### Quick Start: Run the Example
+
+Try the complete example script first to see the aligner in action:
+
+```bash
+python3 examples/align_example.py
+```
+
+This demonstrates:
+- Initializing the aligner
+- Aligning Danish-Kalaallisut text
+- Filtering by confidence scores
+- Saving results to file
+
+### 1. Align New Document Pairs
+
+The aligner can align Danish and Kalaallisut documents using two methods:
+
+#### Method A: Production Aligner (hunalign - Recommended)
 ```bash
 # Align two parallel documents (one sentence per line)
 ./scripts/align_production.sh danish.txt kalaallisut.txt > output.txt
@@ -57,6 +76,43 @@ chmod +x scripts/*.sh
 # High-quality alignments only (confidence > 0.5)
 ./scripts/align_production.sh danish.txt kalaallisut.txt | awk -F'\t' '$3 > 0.5'
 ```
+
+**Output format:** `danish_sentence <TAB> kalaallisut_sentence <TAB> confidence_score`
+
+#### Method B: Statistical Aligner (Python - For pre-split text)
+```bash
+# For documents that are already split into parallel paragraphs/sections
+python3 -c "
+from src.aligner import SentenceAligner
+import sys
+
+# Read input files
+with open('danish.txt', 'r') as f:
+    danish_text = f.read()
+with open('kalaallisut.txt', 'r') as f:
+    kal_text = f.read()
+
+# Initialize aligner with training statistics
+aligner = SentenceAligner('data/processed/alignment_stats.json')
+
+# Align documents
+alignments = aligner.align_documents(danish_text, kal_text)
+
+# Save results
+aligner.save_alignments(alignments, 'output.txt')
+
+# Print statistics
+high_conf = sum(1 for a in alignments if a['confidence'] > 0.5)
+print(f'Total alignments: {len(alignments)}', file=sys.stderr)
+print(f'High confidence (>0.5): {high_conf} ({100*high_conf/len(alignments):.1f}%)', file=sys.stderr)
+"
+```
+
+**Output format:** `danish_sentence @ kalaallisut_sentence`
+
+**When to use each method:**
+- **hunalign (Method A)**: Best for large documents with no prior alignment, handles unbalanced documents
+- **Python aligner (Method B)**: Best for pre-aligned paragraphs, faster for small documents, customizable weights
 
 ### 2. Gloss Kalaallisut Text
 ```bash
@@ -82,6 +138,34 @@ python3 test_morphology.py
 python3 scripts/extract_cognates.py
 # Creates: data/processed/cognates.json
 ```
+
+### 5. Add New Training Data
+
+If you have additional parallel corpus data to improve the aligner:
+
+```bash
+# Step 1: Place your parallel corpus file in data/test/
+# Format: DA: <danish>\nKL: <kalaallisut>\nCONF: <score>\n\n
+# Example: data/test/parallel_corpus_clean.txt
+
+# Step 2: Parse and append to training data
+python3 scripts/append_parallel_corpus.py
+# - Parses DA/KL/CONF format
+# - Filters by confidence threshold (>= 0.5)
+# - Appends to data/processed/train.txt
+# - Creates backup at train.txt.backup
+
+# Step 3: Recalculate alignment statistics
+python3 scripts/calculate_stats_fast.py
+# - Updates data/processed/alignment_stats.json
+# - Creates backup at alignment_stats.json.backup
+# - Shows before/after comparison
+```
+
+**What this does:**
+- Expands the training dataset with new parallel sentences
+- Recalculates word/character ratios for better alignment accuracy
+- Backups are created automatically for safety
 
 ## 📚 Documentation
 
@@ -116,6 +200,12 @@ The API documentation includes:
   - Performance optimizations
   - Implementation roadmap
 
+- **[CLEANUP_REPO.md](CLEANUP_REPO.md)** - Repository cleanup guide
+  - What files should/shouldn't be tracked
+  - How to clean up large data files
+  - .gitignore best practices
+  - Repository maintenance
+
 - **[BROWSER_EXTENSION_FEASIBILITY.md](BROWSER_EXTENSION_FEASIBILITY.md)** - Browser extension analysis
   - Feasibility assessment for creating a browser extension
   - Four architectural approaches evaluated
@@ -144,17 +234,24 @@ kalaallisut-aligner/
 ├── src/
 │   ├── morphology.py     # HFST morphological analysis (centralized)
 │   ├── preprocessor.py   # Text preprocessing & sentence processing
-│   ├── aligner.py        # Sentence alignment (backup)
+│   ├── aligner.py        # Sentence alignment algorithm
+│   ├── config.py         # Configuration management
 │   └── utils.py          # Helper functions (load/save pairs)
 ├── glosser/
 │   ├── glosser_v2_fixed.py           # Main glosser
 │   ├── morpheme_glosses.json         # Tag translations
 │   └── kalaallisut_english_dict.json # 16,819 entries
+├── examples/
+│   ├── align_example.py          # Complete alignment example
+│   └── tts_alignment_demo.py     # TTS alignment demo
 ├── scripts/
-│   ├── align_production.sh    # Production aligner
-│   ├── extract_cognates.py    # Cognate extraction
-│   ├── extract_da_kal_dict.py # Dictionary extraction
-│   └── test_morphology.py     # Interactive morphology tester
+│   ├── align_production.sh       # Production aligner (hunalign)
+│   ├── extract_cognates.py       # Cognate extraction
+│   ├── extract_da_kal_dict.py    # Dictionary extraction
+│   ├── test_morphology.py        # Interactive morphology tester
+│   ├── append_parallel_corpus.py # Add new training data
+│   ├── calculate_stats.py        # Recalculate alignment statistics
+│   └── calculate_stats_fast.py   # Fast statistics calculation
 ├── tests/
 │   ├── test_aligner.py        # Aligner unit tests
 │   ├── test_preprocessor.py   # Preprocessor unit tests
@@ -171,8 +268,9 @@ kalaallisut-aligner/
 - `glosser/kalaallisut_english_dict.json` - Kalaallisut→English (16,819 entries)
 
 ### Models & Stats
-- `data/processed/alignment_stats.json` - Training corpus statistics
-- `data/aligned/corpus_6798_pairs.txt` - 6,812 aligned training pairs
+- `data/processed/alignment_stats.json` - Training corpus statistics (updated: 8,178 pairs)
+- `data/processed/train.txt` - 8,178 aligned training pairs
+- `data/processed/test.txt` - 1,362 test pairs
 - `data/DATA_VERSIONS.md` - Data version tracking and provenance
 
 ## 📈 Performance
@@ -189,6 +287,35 @@ kalaallisut-aligner/
 - **HTML/text/JSON output** formats
 
 ## 🛠️ Advanced Usage
+
+### Complete Alignment Example
+
+Here's a complete workflow for aligning a new Danish-Kalaallisut document pair:
+
+```bash
+# 1. Create your input files (one sentence per line, or raw text)
+cat > danish.txt << 'EOF'
+Grønlands parlament mødes i dag.
+Regeringen præsenterer det nye budget.
+EOF
+
+cat > kalaallisut.txt << 'EOF'
+Kalaallit Nunaanni inatsisartut ullumi ataatsimiinnissavaat.
+Naalakkersuisut kingorna aningaasanik nalunaaruteqarnermi saqqummiunneqartartunik saqqummiunneqarput.
+EOF
+
+# 2. Align using hunalign (recommended for production)
+./scripts/align_production.sh danish.txt kalaallisut.txt > aligned.txt
+
+# View results
+cat aligned.txt
+# Output:
+# Grønlands parlament mødes i dag.	Kalaallit Nunaanni inatsisartut ullumi ataatsimiinnissavaat.	0.82
+# Regeringen præsenterer det nye budget.	Naalakkersuisut kingorna aningaasanik...	0.65
+
+# 3. Filter by confidence
+awk -F'\t' '$3 > 0.7' aligned.txt > high_confidence.txt
+```
 
 ### Extract Word Dictionary from Aligned Pairs
 ```python
@@ -216,6 +343,53 @@ for da_file in data/raw/*.da.txt; do
     ./scripts/align_production.sh "$da_file" "$kal_file" > "$output"
 done
 ```
+
+### Using the Python Aligner Programmatically
+
+For integration into Python scripts:
+
+```python
+#!/usr/bin/env python3
+import sys
+sys.path.insert(0, 'src')
+from aligner import SentenceAligner
+
+# Initialize aligner
+aligner = SentenceAligner('data/processed/alignment_stats.json')
+
+# Your Danish and Kalaallisut texts
+danish_text = """
+Grønlands parlament mødes i dag.
+Regeringen præsenterer det nye budget.
+"""
+
+kalaallisut_text = """
+Kalaallit Nunaanni inatsisartut ullumi ataatsimiinnissavaat.
+Naalakkersuisut kingorna aningaasanik nalunaaruteqarnermi saqqummiunneqartartunik saqqummiunneqarput.
+"""
+
+# Align
+alignments = aligner.align_documents(danish_text, kalaallisut_text)
+
+# Process results
+for i, align in enumerate(alignments, 1):
+    print(f"Pair {i} (confidence: {align['confidence']:.2f})")
+    print(f"  DA: {align['danish']}")
+    print(f"  KL: {align['kalaallisut']}")
+    print()
+
+# Save to file
+aligner.save_alignments(alignments, 'output.txt')
+
+# Filter high-confidence alignments
+high_conf = [a for a in alignments if a['confidence'] > 0.5]
+print(f"High-confidence alignments: {len(high_conf)}/{len(alignments)}")
+```
+
+**Key Parameters:**
+- `stats_file`: Path to alignment statistics (default: `data/processed/alignment_stats.json`)
+- Alignment weights can be customized in `src/config.py`
+- Returns list of dictionaries with keys: `danish`, `kalaallisut`, `confidence`, `da_index`, `kal_index`
 
 ## 📚 References
 
@@ -373,6 +547,14 @@ See `data/DATA_VERSIONS.md` for:
 ---
 
 **Built:** November 2025
-**Version:** 1.0
+**Version:** 1.1
+**Last Updated:** November 2025
 **Status:** Production ready
 **Maintainer:** VoiceLessQ
+
+**Recent Updates (v1.1):**
+- Expanded training dataset from 5,438 to 8,178 pairs (+50%)
+- Updated alignment statistics (word ratio: 1.55, char ratio: 0.80)
+- Added scripts for appending new parallel corpus data
+- Enhanced documentation with complete alignment examples
+- Added programmatic Python aligner usage guide
