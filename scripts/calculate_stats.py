@@ -20,9 +20,9 @@ except ImportError:
     def tokenize_text(text):
         return text.split()
 
+
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,8 @@ def calculate_statistics(pairs):
     char_ratios = []
 
     for pair in pairs:
-        danish = pair['danish']
-        kalaallisut = pair['kalaallisut']
+        danish = pair["danish"]
+        kalaallisut = pair["kalaallisut"]
 
         # Word count
         da_words = len(danish.split())
@@ -68,10 +68,7 @@ def calculate_statistics(pairs):
     avg_word_ratio = sum(word_ratios) / len(word_ratios) if word_ratios else 0
     avg_char_ratio = sum(char_ratios) / len(char_ratios) if char_ratios else 0
 
-    return {
-        'avg_word_ratio': avg_word_ratio,
-        'avg_char_ratio': avg_char_ratio
-    }
+    return {"avg_word_ratio": avg_word_ratio, "avg_char_ratio": avg_char_ratio}
 
 
 def main():
@@ -93,9 +90,9 @@ def main():
     # Backup existing stats
     if stats_file.exists():
         logger.info(f"Backing up existing stats to: {backup_stats}")
-        with open(stats_file, 'r') as f:
+        with open(stats_file, "r") as f:
             old_stats = json.load(f)
-        with open(backup_stats, 'w') as f:
+        with open(backup_stats, "w") as f:
             json.dump(old_stats, f, indent=2)
         logger.info(f"Old stats: {old_stats}")
 
@@ -118,17 +115,17 @@ def main():
         logger.info("")
         logger.info("COMPARISON")
         logger.info("=" * 60)
-        with open(stats_file, 'r') as f:
+        with open(stats_file, "r") as f:
             old_stats = json.load(f)
-        word_diff = stats['avg_word_ratio'] - old_stats['avg_word_ratio']
-        char_diff = stats['avg_char_ratio'] - old_stats['avg_char_ratio']
+        word_diff = stats["avg_word_ratio"] - old_stats["avg_word_ratio"]
+        char_diff = stats["avg_char_ratio"] - old_stats["avg_char_ratio"]
         logger.info(f"Word ratio change: {word_diff:+.4f}")
         logger.info(f"Char ratio change: {char_diff:+.4f}")
 
     # Save new statistics
     logger.info("")
     logger.info(f"Saving statistics to: {stats_file}")
-    with open(stats_file, 'w') as f:
+    with open(stats_file, "w") as f:
         json.dump(stats, f, indent=2)
 
     logger.info("=" * 60)

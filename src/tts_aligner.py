@@ -73,28 +73,32 @@ class MarthaTTS:
             response.raise_for_status()
 
             # Check if response is audio data (MP3) or JSON
-            content_type = response.headers.get('content-type', '').lower()
-            
-            if 'audio' in content_type or 'mpeg' in content_type:
+            content_type = response.headers.get("content-type", "").lower()
+
+            if "audio" in content_type or "mpeg" in content_type:
                 # API returns audio data directly
-                filename = response.headers.get('X-Cached-As',
-                              response.headers.get('content-disposition', '').split('filename=')[-1].strip('"'))
-                
+                filename = response.headers.get(
+                    "X-Cached-As",
+                    response.headers.get("content-disposition", "")
+                    .split("filename=")[-1]
+                    .strip('"'),
+                )
+
                 if not filename:
                     # Generate filename from content
                     filename = f"{hash(text)}.mp3"
-                
+
                 # Create data structure similar to expected JSON
                 data = {
                     "fn": filename,
                     "du": None,  # Duration not available from headers
                     "sz": len(response.content),
                     "ts": [],  # Timestamps not available
-                    "audio_url": self.data_url + filename
+                    "audio_url": self.data_url + filename,
                 }
-                
+
                 logger.info(f"TTS successful: {filename} ({data['sz']} bytes)")
-                
+
             else:
                 # Try to parse as JSON (for future API compatibility)
                 try:
@@ -102,7 +106,9 @@ class MarthaTTS:
                     # Add full audio URL
                     if "fn" in data:
                         data["audio_url"] = self.data_url + data["fn"]
-                        logger.info(f"TTS successful: {data['fn']} ({data.get('du', 0):.2f}s)")
+                        logger.info(
+                            f"TTS successful: {data['fn']} ({data.get('du', 0):.2f}s)"
+                        )
                     else:
                         logger.warning("TTS response missing 'fn' field")
                 except json.JSONDecodeError:
@@ -113,7 +119,7 @@ class MarthaTTS:
                         "du": None,
                         "sz": len(response.content),
                         "ts": [],
-                        "audio_url": self.data_url + filename
+                        "audio_url": self.data_url + filename,
                     }
                     logger.info(f"TTS successful: {filename} ({data['sz']} bytes)")
 
