@@ -51,8 +51,8 @@ def calculate_statistics(pairs):
             kal_tokens = tokenize_text(kalaallisut)
             # Filter out punctuation
             kal_words = len([t for t in kal_tokens if t.strip() and t not in ".,;:!?"])
-        except:
-            # Fallback to simple split
+        except (RuntimeError, ValueError, OSError) as e:
+            # Fallback to simple split if tokenizer fails
             kal_words = len(kalaallisut.split())
 
         # Character count

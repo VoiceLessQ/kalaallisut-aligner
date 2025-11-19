@@ -118,8 +118,6 @@ def batch_mode(words):
 
 
 if __name__ == "__main__":
-    import sys
-
     if len(sys.argv) > 1:
         # Batch mode with command line args
         batch_mode(sys.argv[1:])

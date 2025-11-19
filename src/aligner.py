@@ -114,7 +114,8 @@ class SentenceAligner:
                 last_word = words[-1][:-1] if words else ""  # Remove period
 
                 # Get next word
-                next_word = next_text.split()[0] if next_text.split() else ""
+                next_tokens = next_text.split()
+                next_word = next_tokens[0] if next_tokens else ""
 
                 # Don't split if: number + period + month name
                 if last_word.isdigit() and next_word.lower() in months:
