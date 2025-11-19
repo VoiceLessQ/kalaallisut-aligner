@@ -5,7 +5,7 @@ Extract alignment features from training data.
 import json
 import logging
 from pathlib import Path
-from preprocessor import tokenize_text, analyze_word
+from morphology import tokenize_text, analyze_word
 from utils import load_aligned_pairs
 
 logger = logging.getLogger(__name__)
