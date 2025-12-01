@@ -13,9 +13,12 @@ Dependencies:
 import requests
 import json
 import logging
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, TYPE_CHECKING
 from pathlib import Path
 import time
+
+if TYPE_CHECKING:
+    import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -229,7 +232,9 @@ class TTSBasedAligner:
             )
             self.dtw = None
 
-    def extract_mfcc(self, audio_path: Path, n_mfcc: int = 13) -> Optional[object]:
+    def extract_mfcc(
+        self, audio_path: Path, n_mfcc: int = 13
+    ) -> Optional["np.ndarray"]:
         """
         Extract MFCC features from audio file.
 
