@@ -27,6 +27,20 @@ def sample_aligned_pairs():
 
 
 @pytest.fixture
+def temp_cognates_file(tmp_path):
+    """Create a temporary cognates file for testing."""
+    cognates_file = tmp_path / "cognates.json"
+    cognates = {
+        "budget": "budget",
+        "politik": "politikkikkut",
+        "grønland": "kalaallit",
+        "parlament": "inatsisartut",
+    }
+    cognates_file.write_text(json.dumps(cognates))
+    return str(cognates_file)
+
+
+@pytest.fixture
 def temp_stats_file(tmp_path):
     """Create a temporary stats file for testing."""
     stats_file = tmp_path / "stats.json"

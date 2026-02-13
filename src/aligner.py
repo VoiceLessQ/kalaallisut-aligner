@@ -7,7 +7,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import List, Dict, Set, Any
+from typing import Any, Dict, List, Set
 from morphology import tokenize_text
 from config import config
 
@@ -16,11 +16,16 @@ logger = logging.getLogger(__name__)
 
 
 class SentenceAligner:
-    def __init__(self, stats_file: str = "data/processed/alignment_stats.json") -> None:
-        """Initialize with training statistics.
+    def __init__(
+        self,
+        stats_file: str = "data/processed/alignment_stats.json",
+        cognates_file: str = "data/processed/cognates.json",
+    ) -> None:
+        """Initialize with training statistics and cognate dictionary.
 
         Args:
             stats_file: Path to JSON file with alignment statistics
+            cognates_file: Path to JSON file with cognate/loanword pairs
 
         Raises:
             FileNotFoundError: If stats file doesn't exist
@@ -47,6 +52,25 @@ class SentenceAligner:
 
         self.expected_word_ratio = self.stats["avg_word_ratio"]  # 1.48
         self.expected_char_ratio = self.stats["avg_char_ratio"]  # 0.75
+
+        # Load cognate dictionary for lexical scoring
+        self.cognates: Dict[str, str] = {}
+        cognates_path = Path(cognates_file)
+        if cognates_path.exists():
+            try:
+                with open(cognates_file, "r", encoding="utf-8") as f:
+                    raw_cognates = json.load(f)
+                # Filter out noise: keep only actual word cognates (alpha, length >= 3)
+                self.cognates = {
+                    k.lower(): v.lower()
+                    for k, v in raw_cognates.items()
+                    if len(k) >= 3 and any(c.isalpha() for c in k)
+                }
+                logger.info(f"Loaded {len(self.cognates)} cognates for lexical scoring")
+            except (json.JSONDecodeError, IOError) as e:
+                logger.warning(f"Could not load cognates from {cognates_file}: {e}")
+        else:
+            logger.info("No cognates file found, lexical scoring will use exact match only")
 
     def split_sentences(self, text: str) -> List[str]:
         """Split text into sentences with date-aware splitting.
@@ -134,10 +158,55 @@ class SentenceAligner:
 
         return sentences
 
+    def _extract_words(self, sentence: str) -> Set[str]:
+        """Extract lowercase, cleaned words from a sentence."""
+        return {
+            w.strip(".,;:!?()[]\"'").lower()
+            for w in sentence.split()
+            if len(w.strip(".,;:!?()[]\"'")) >= 3
+        }
+
+    def _lexical_score(self, danish_sent: str, kal_sent: str) -> float:
+        """Score based on cognate/loanword overlap between sentences.
+
+        Checks for:
+        1. Exact word matches (shared loanwords, proper nouns, numbers)
+        2. Known cognate pairs from the cognate dictionary
+
+        Returns:
+            Score from 0.0 (no overlap) to 1.0 (strong overlap)
+        """
+        da_words = self._extract_words(danish_sent)
+        kal_words = self._extract_words(kal_sent)
+
+        if not da_words or not kal_words:
+            return 0.0
+
+        matches = 0
+
+        for da_word in da_words:
+            # Exact match (shared loanwords, names, numbers)
+            if da_word in kal_words:
+                matches += 1
+                continue
+
+            # Known cognate pair
+            if da_word in self.cognates and self.cognates[da_word] in kal_words:
+                matches += 1
+
+        denominator = min(len(da_words), len(kal_words))
+        return min(1.0, matches / denominator) if denominator > 0 else 0.0
+
     def calculate_similarity(
         self, danish_sent: str, kal_sent: str, da_pos: float, kal_pos: float
     ) -> float:
         """Calculate similarity score between two sentences.
+
+        Uses four features:
+        - Word count ratio vs expected ratio (how similar sentence lengths are)
+        - Character count ratio vs expected ratio
+        - Position in document (sentences at same relative position match better)
+        - Lexical overlap (shared cognates, loanwords, proper nouns)
 
         Args:
             danish_sent: Danish sentence
@@ -188,11 +257,15 @@ class SentenceAligner:
         # Position similarity (prefer same relative position)
         position_score = 1.0 - abs(da_pos - kal_pos)
 
+        # Lexical overlap (cognates, loanwords, shared terms)
+        lexical_score = self._lexical_score(danish_sent, kal_sent)
+
         # Weighted combination (weights from config)
         similarity = (
             config.word_score_weight * max(0, word_score)
             + config.char_score_weight * max(0, char_score)
             + config.position_score_weight * max(0, position_score)
+            + config.lexical_score_weight * lexical_score
         )
 
         return similarity

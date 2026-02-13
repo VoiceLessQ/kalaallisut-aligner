@@ -48,9 +48,10 @@ class Config:
             },
             "alignment": {
                 "confidence_threshold": 0.5,
-                "word_score_weight": 0.4,
-                "char_score_weight": 0.3,
-                "position_score_weight": 0.3,
+                "word_score_weight": 0.3,
+                "char_score_weight": 0.2,
+                "position_score_weight": 0.2,
+                "lexical_score_weight": 0.3,
                 "min_sentence_length": 5,
             },
             "cognates": {
@@ -123,6 +124,11 @@ class Config:
     def position_score_weight(self) -> float:
         """Get position score weight for alignment."""
         return float(self.get("alignment.position_score_weight", 0.3))
+
+    @property
+    def lexical_score_weight(self) -> float:
+        """Get lexical/cognate score weight for alignment."""
+        return float(self.get("alignment.lexical_score_weight", 0.3))
 
     @property
     def min_sentence_length(self) -> int:
