@@ -5,22 +5,58 @@ __pycache__/
 *.so
 .Python
 *.egg-info/
+dist/
+build/
 
 # Virtual environments
 venv/
 env/
 ENV/
+.venv/
 
-# Data files
+# Data files - Raw and processed training data
 data/raw/*.txt
+data/raw/*.csv
 data/processed/*.txt
+data/processed/*.csv
 *.zip
 *.tar.gz
+*.gz
+
+# Aligned output files (generated files)
+data/aligned/*.txt
+data/aligned/*.csv
+
+# Test data files (large corpus files)
+data/test/*.txt
+data/test/*.csv
+
+# Example outputs (generated files)
+examples/example_output.txt
+examples/*.output.*
+
+# Audio files
+*.wav
+*.mp3
+*.ogg
+*.flac
+Audio/
+
+# Backup files
+*.backup
+*.bak
+*~
+*.swp
+*.swo
 
 # Temporary files
 *.tmp
 *.log
 .DS_Store
+
+# Documentation builds
+docs/build/
+docs/_build/
 
 # IDE
 .vscode/
@@ -28,8 +64,30 @@ data/processed/*.txt
 *.swp
 *.swo
 
-# Keep important files
+# OS
+.DS_Store
+Thumbs.db
+
+# Windows shortcuts
+*.lnk
+
+# Deployment scripts (usually custom/local)
+deploy_*.sh
+
+# Temporary markdown notes
+"clean up.md"
+
+# Keep important files explicitly
 !data/processed/cognates.json
+!data/processed/hunalign_dict.txt
 !data/processed/hunalign_dict_full.txt
 !data/processed/alignment_stats.json
+
+# Keep essential documentation
 !README.md
+!CHANGELOG.md
+!LICENSE
+
+# Keep example scripts but not their outputs
+!examples/*.py
+!examples/README.md

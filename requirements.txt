@@ -1,0 +1,36 @@
+# Kalaallisut-Danish Sentence Aligner
+# Python dependencies
+
+# Core dependencies
+pandas>=1.5.0
+odfpy>=1.4.1
+
+# Optional but recommended
+beautifulsoup4>=4.11.0  # For web scraping
+lxml>=4.9.0  # XML parsing
+
+# TTS-based alignment (optional)
+requests>=2.28.0  # For Martha TTS API calls
+librosa>=0.10.0  # Audio processing and MFCC extraction
+dtaidistance>=2.3.0  # Dynamic Time Warping for alignment
+numpy>=1.23.0  # Numerical operations
+scipy>=1.10.0  # Scientific computing
+
+# Development (optional)
+pytest>=7.0.0  # Testing
+pytest-cov>=4.0.0  # Test coverage
+black>=22.0.0  # Code formatting
+mypy>=0.990  # Type checking
+
+# Documentation
+sphinx>=5.0.0  # Documentation generation
+sphinx-rtd-theme>=1.2.0  # Read the Docs theme
+
+# Note: System dependencies (not installable via pip):
+# - hunalign: https://github.com/danielvarga/hunalign
+# - lang-kal (HFST tools): https://github.com/giellalt/lang-kal
+# - build-essential, git, make (for building lang-kal)
+#
+# Set environment variables for custom paths:
+# - LANG_KAL_PATH: Path to lang-kal installation (default: ~/lang-kal)
+# - HUNALIGN_PATH: Path to hunalign binary (default: ~/hunalign/src/hunalign/hunalign)

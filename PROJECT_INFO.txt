@@ -12,14 +12,21 @@ Components:
 - Cognate extractor (1,526 entries)
 
 Dataset:
-- 6,798 aligned sentence pairs
-- 5,438 training / 1,360 test
+- 6,812 aligned sentence pairs
+- 5,450 training / 1,362 test
 - Danish-Kalaallisut government documents
 
 Performance:
 - Alignment confidence: 48.1% average
 - High confidence (>0.5): 34.7%
 - Morphology coverage: 16,819 roots
+
+Environment Variables:
+- LANG_KAL_PATH: Custom lang-kal path
+- HUNALIGN_PATH: Custom hunalign path
+
+License: MIT License (see LICENSE file)
+Dependencies: GPL-3.0 (lang-kal), LGPL-3.0 (hunalign), CC-BY-SA 4.0 (dictionary)
 
 For setup: ./setup.sh
 For usage: cat README.md
