@@ -28,7 +28,6 @@ The `.gitignore` file has been updated to properly exclude generated files, larg
 - `*.backup` (e.g., `train.txt.backup`, `alignment_stats.json.backup`)
 - `*.bak`, `*~`
 - `*.log`, `*.tmp`
-- `clean up.md`
 
 **Why:** Temporary files and backups shouldn't be tracked
 
@@ -77,7 +76,6 @@ The following files are currently in git but should be removed:
 
 ```bash
 # Files to remove from tracking:
-clean up.md                          # Temporary notes
 data/aligned/corpus_6798_pairs.txt   # Generated alignment output
 data/aligned/test_output.txt         # Generated test output
 deploy_all.sh                        # Deployment script
@@ -92,7 +90,6 @@ deploy_clean.sh                      # Deployment script
 cd /home/voicelessq/kalaallisut-aligner
 
 # Remove files from git tracking (but keep locally)
-git rm --cached "clean up.md"
 git rm --cached data/aligned/corpus_6798_pairs.txt
 git rm --cached data/aligned/test_output.txt
 git rm --cached deploy_all.sh

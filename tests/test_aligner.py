@@ -105,6 +105,50 @@ class TestCalculateSimilarity:
         assert 0.0 <= score <= 1.0
 
 
+class TestLexicalScoring:
+    """Tests for cognate/lexical overlap scoring."""
+
+    def test_exact_match_boosts_score(self, temp_stats_file, temp_cognates_file):
+        """Shared loanwords should increase similarity."""
+        aligner = SentenceAligner(temp_stats_file, temp_cognates_file)
+        # Sentences sharing "budget" (a loanword in both languages)
+        score_with_match = aligner.calculate_similarity(
+            "Det nye budget er klar.", "Budget nutaaq aalajangersarneqarpoq.", 0.5, 0.5
+        )
+        # Sentences with no shared words
+        score_without = aligner.calculate_similarity(
+            "Hunden løber hurtigt.", "Qimmeq sukkasuumik angivoq.", 0.5, 0.5
+        )
+        assert score_with_match > score_without
+
+    def test_cognate_dict_match(self, temp_stats_file, temp_cognates_file):
+        """Known cognate pairs should be detected."""
+        aligner = SentenceAligner(temp_stats_file, temp_cognates_file)
+        # "politik" maps to "politikkikkut" in our test cognates
+        score = aligner._lexical_score(
+            "Den nye politik er vedtaget.",
+            "Politikkikkut nutaaq atuuttilerpoq.",
+        )
+        assert score > 0.0
+
+    def test_no_cognates_file(self, temp_stats_file):
+        """Aligner should work without cognates file."""
+        aligner = SentenceAligner(temp_stats_file, "nonexistent_cognates.json")
+        assert aligner.cognates == {}
+        # Should still produce valid scores
+        score = aligner.calculate_similarity(
+            "This is a test.", "Uanga test.", 0.5, 0.5
+        )
+        assert 0.0 <= score <= 1.0
+
+    def test_lexical_score_empty_sentences(self, temp_stats_file, temp_cognates_file):
+        """Lexical score should be 0 for sentences with only short words."""
+        aligner = SentenceAligner(temp_stats_file, temp_cognates_file)
+        # All words < 3 chars after stripping, so _extract_words returns empty
+        score = aligner._lexical_score("I am ok.", "Ja ok.")
+        assert score == 0.0
+
+
 class TestAlignGreedy:
     """Tests for greedy alignment algorithm."""
 

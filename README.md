@@ -8,7 +8,7 @@ Complete NLP toolkit for Kalaallisut language processing and Danish-Kalaallisut 
 
 ### ✅ Core Components
 - **Morphological Analyzer** - Full Kalaallisut morphology using lang-kal/GiellaLT
-- **Sentence Aligner** - hunalign-based alignment with cognate dictionary (34.7% high-confidence)
+- **Sentence Aligner** - hunalign-based alignment with cognate-boosted scoring (34.7% high-confidence)
 - **Glosser** - Morpheme-by-morpheme analysis with 16,819 dictionary entries
 - **Cognate Extractor** - 1,526 Danish-Kalaallisut shared terms
 
@@ -210,17 +210,11 @@ The API documentation includes:
   - Feasibility assessment for creating a browser extension
   - Four architectural approaches evaluated
   - Implementation plan and cost estimates
-  - Technical specifications and use cases
 
-- **[REFERENCE_ANALYSIS.md](REFERENCE_ANALYSIS.md)** - Academic reference analysis
-  - Detailed analysis of all cited tools and papers
-  - License compatibility review
-  - Data source documentation
-
-- **[ANALYSIS.md](ANALYSIS.md)** - Project analysis and overview
-  - Comprehensive project assessment
-  - Feature breakdown and capabilities
-  - Development recommendations
+- **[ANALYSIS.md](ANALYSIS.md)** - Consolidated project analysis
+  - Architecture overview, dependencies, and data assets
+  - Reference analysis and license compatibility
+  - Roadmap and areas for improvement
 
 ## 📁 Project Structure
 
@@ -388,6 +382,7 @@ print(f"High-confidence alignments: {len(high_conf)}/{len(alignments)}")
 
 **Key Parameters:**
 - `stats_file`: Path to alignment statistics (default: `data/processed/alignment_stats.json`)
+- `cognates_file`: Path to cognate dictionary (default: `data/processed/cognates.json`) -- optional, boosts alignment accuracy via lexical overlap
 - Alignment weights can be customized in `src/config.py`
 - Returns list of dictionaries with keys: `danish`, `kalaallisut`, `confidence`, `da_index`, `kal_index`
 
@@ -437,7 +432,7 @@ And cite the underlying tools as appropriate.
 This project follows modern Python best practices:
 
 - **✅ Type Hints**: Full type annotations across all modules (List, Dict, Optional, etc.)
-- **✅ Comprehensive Testing**: 41 unit tests with pytest, CI/CD via GitHub Actions
+- **✅ Comprehensive Testing**: 45 unit tests with pytest, CI/CD via GitHub Actions
 - **✅ Error Handling**: Robust error handling with proper exceptions and validation
 - **✅ Structured Logging**: Logging framework for debugging and monitoring
 - **✅ Code Formatting**: Black formatter with consistent style
@@ -455,7 +450,7 @@ Contributions welcome! Please see [CODE_RECOMMENDATIONS.md](CODE_RECOMMENDATIONS
 ### Priority Areas (Updated November 2025)
 - **✅ Completed**: Type hints, error handling, security fixes, input validation, unit tests, code deduplication, configuration module, performance optimizations
 - **🔄 In Progress**: Logging implementation (on feature branch)
-- **Future Features**: Additional cognate extraction, neural alignment models, improved glossing accuracy, web interface, Sphinx documentation
+- **Future Features**: Neural alignment models, improved glossing accuracy, web interface, Sphinx documentation
 
 ### Development Setup
 1. Fork the repository
@@ -506,9 +501,10 @@ nano config.json
   "lang_kal_path": "~/lang-kal",
   "hunalign_path": "~/hunalign/src/hunalign/hunalign",
   "alignment": {
-    "word_score_weight": 0.4,
-    "char_score_weight": 0.3,
-    "position_score_weight": 0.3,
+    "word_score_weight": 0.3,
+    "char_score_weight": 0.2,
+    "position_score_weight": 0.2,
+    "lexical_score_weight": 0.3,
     "min_sentence_length": 5
   },
   "cognates": {
@@ -521,9 +517,10 @@ nano config.json
 **Configuration Options:**
 - **`lang_kal_path`**: Path to lang-kal installation
 - **`hunalign_path`**: Path to hunalign binary
-- **`alignment.word_score_weight`**: Weight for word count similarity (default: 0.4)
-- **`alignment.char_score_weight`**: Weight for character count similarity (default: 0.3)
-- **`alignment.position_score_weight`**: Weight for sentence position similarity (default: 0.3)
+- **`alignment.word_score_weight`**: Weight for word count similarity (default: 0.3)
+- **`alignment.char_score_weight`**: Weight for character count similarity (default: 0.2)
+- **`alignment.position_score_weight`**: Weight for sentence position similarity (default: 0.2)
+- **`alignment.lexical_score_weight`**: Weight for cognate/loanword lexical overlap (default: 0.3)
 - **`alignment.min_sentence_length`**: Minimum characters for sentence splitting (default: 5)
 - **`cognates.min_word_length`**: Minimum word length for cognate extraction (default: 3)
 - **`cognates.max_edit_distance`**: Maximum edit distance for cognate matching (default: 2)
@@ -547,14 +544,17 @@ See `data/DATA_VERSIONS.md` for:
 ---
 
 **Built:** November 2025
-**Version:** 1.1
-**Last Updated:** November 2025
+**Version:** 1.2
+**Last Updated:** February 2026
 **Status:** Production ready
 **Maintainer:** VoiceLessQ
 
-**Recent Updates (v1.1):**
+**Recent Updates (v1.2):**
+- Integrated cognate dictionary into alignment scoring (lexical overlap feature)
+- Rebalanced scoring weights: word=0.3, char=0.2, position=0.2, lexical=0.3
+- 45 unit tests (up from 41)
+
+**Previous (v1.1):**
 - Expanded training dataset from 5,438 to 8,178 pairs (+50%)
 - Updated alignment statistics (word ratio: 1.55, char ratio: 0.80)
 - Added scripts for appending new parallel corpus data
-- Enhanced documentation with complete alignment examples
-- Added programmatic Python aligner usage guide
