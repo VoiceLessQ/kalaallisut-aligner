@@ -9,7 +9,6 @@ echo "Repository Cleanup Script"
 echo "========================================================================"
 echo ""
 echo "This script will remove the following files from git tracking:"
-echo "  - clean up.md (temporary notes)"
 echo "  - data/aligned/*.txt (generated outputs)"
 echo "  - deploy_*.sh (deployment scripts)"
 echo ""
@@ -33,12 +32,6 @@ fi
 echo ""
 echo "Removing files from git tracking..."
 echo "========================================================================"
-
-# Remove temporary markdown file
-if git ls-files --error-unmatch "clean up.md" >/dev/null 2>&1; then
-    echo "Removing: clean up.md"
-    git rm --cached "clean up.md" || true
-fi
 
 # Remove aligned output files
 for file in data/aligned/*.txt; do

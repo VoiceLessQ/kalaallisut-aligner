@@ -1,7 +1,7 @@
 Kalaallisut-Danish Sentence Aligner Documentation
 =================================================
 
-Complete NLP toolkit for Kalaallisut language processing and Danish-Kalaallisut parallel corpus alignment.
+Tools for aligning Danish and Kalaallisut parallel text, morphological analysis, and glossing.
 
 .. image:: https://github.com/VoiceLessQ/kalaallisut-aligner/actions/workflows/test.yml/badge.svg
    :target: https://github.com/VoiceLessQ/kalaallisut-aligner/actions/workflows/test.yml
@@ -20,7 +20,7 @@ Dataset
 
 * **6,812 aligned sentence pairs** (5,450 train / 1,362 test)
 * Extracted from parallel Danish-Kalaallisut government documents
-* Smart date-aware sentence splitting
+* Date-aware sentence splitting
 * Avg word ratio: 1.36 (Danish/Kalaallisut)
 
 Quick Start
@@ -140,12 +140,10 @@ Performance
 Code Quality
 ------------
 
-* ✅ Type hints (100% coverage)
-* ✅ Comprehensive testing (41 unit tests, CI/CD)
-* ✅ Error handling & validation
-* ✅ Performance optimized (O(n) algorithms, caching)
-* ✅ Centralized configuration
-* ✅ Modular design
+* Type hints throughout
+* 45 unit tests, CI via GitHub Actions
+* Error handling and input validation
+* Centralized configuration (``config.json`` + env vars)
 
 Indices and tables
 ==================

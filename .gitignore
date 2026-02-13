@@ -74,9 +74,6 @@ Thumbs.db
 # Deployment scripts (usually custom/local)
 deploy_*.sh
 
-# Temporary markdown notes
-"clean up.md"
-
 # Keep important files explicitly
 !data/processed/cognates.json
 !data/processed/hunalign_dict.txt
