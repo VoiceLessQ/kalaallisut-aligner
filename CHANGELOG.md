@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.2] - 2026-02-13
+
+### Added
+- **Lexical/Cognate Scoring** in the Python sentence aligner
+  - `SentenceAligner` now loads `data/processed/cognates.json` at init
+  - New `_lexical_score()` method detects shared loanwords, proper nouns, and known cognate pairs between sentence pairs
+  - Cognate file is optional -- aligner degrades gracefully when absent
+- **New Tests**
+  - `TestLexicalScoring` class with 4 tests (exact match boost, cognate dict lookup, missing file fallback, empty sentence handling)
+  - Total unit tests: 41 → 45
+
+### Changed
+- **Scoring Weights Rebalanced**
+  - Word ratio: 0.4 → 0.3
+  - Character ratio: 0.3 → 0.2
+  - Position: 0.3 → 0.2
+  - Lexical overlap (new): 0.3
+- **`SentenceAligner.__init__`** accepts optional `cognates_file` parameter
+- **`config.py`** adds `lexical_score_weight` setting
+- Updated README with new configuration options and version info
+
 ## [1.1] - 2025-11-16
 
 ### Added
