@@ -216,7 +216,7 @@ Kalaallisut-Danish Sentence Aligner
 
 Version: 1.0
 Built: November 2025
-Status: Production Ready
+Status: Active development
 
 Components:
 - Morphological analyzer (lang-kal/GiellaLT)

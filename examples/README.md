@@ -1,13 +1,8 @@
-# Example Data
+# Examples
 
-## Files
-- `example_danish.txt` - 3 Danish sentences
-- `example_kalaallisut.txt` - 3 Kalaallisut sentences
+- `align_example.py` -- shows how to use the Python aligner
+- `tts_alignment_demo.py` -- TTS-based audio alignment demo
 
-## Usage
 ```bash
-cd ..
-./scripts/align_production.sh examples/example_danish.txt examples/example_kalaallisut.txt
+python3 examples/align_example.py
 ```
-
-Expected output: 3 aligned pairs with confidence scores.
